@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aschenkrone — Mockup 1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --gold: #c9a227;
+    --gold-bright: #f0d060;
+    --gold-dim: #8a6d1d;
+    --ash: #171412;
+    --ash-2: #211d19;
+    --ash-3: #2c2620;
+    --bone: #d8cbb3;
+    --bone-dim: #9a8f7a;
+    --ember: #e2622b;
+    --blood: #7a1f1f;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--ash);
+    color: var(--bone);
+    font-family: 'EB Garamond', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, .cinzel { font-family: 'Cinzel', Georgia, serif; }
+
+  /* ── Key-Art Hintergrund ── */
+  .bg {
+    position: fixed; inset: 0; z-index: -2;
+    background: url('../../assets/generated/01-aschenkrone-keyart.jpg') center 20%/cover no-repeat;
+    filter: brightness(.42) saturate(.9);
+  }
+  .bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 30%, transparent 20%, rgba(13,11,9,.92) 75%);
+  }
+
+  /* ── Schwebende Asche-Partikel ── */
+  .ember-field { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  .ember-p {
+    position: absolute; width: 3px; height: 3px; border-radius: 50%;
+    background: var(--gold-bright);
+    opacity: 0; animation: emberRise linear infinite;
+    box-shadow: 0 0 6px 1px rgba(240, 208, 96, .7);
+  }
+  @keyframes emberRise {
+    0%   { transform: translateY(15vh) translateX(0); opacity: 0; }
+    12%  { opacity: .85; }
+    88%  { opacity: .25; }
+    100% { transform: translateY(-108vh) translateX(6vw); opacity: 0; }
+  }
+
+  /* ── Intro-Overlay ── */
+  .intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse at center, #1a1611 0%, #060504 78%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2rem; padding: 2rem; text-align: center;
+    transition: opacity 1.2s ease;
+  }
+  .intro.hidden { opacity: 0; pointer-events: none; }
+  .intro-rune {
+    width: 130px; height: 130px; border-radius: 50%;
+    background: url('../../assets/generated/01-aschenkrone-runenkreis.jpg') center/cover;
+    box-shadow: 0 0 60px 8px rgba(201,162,39,.35), inset 0 0 30px rgba(0,0,0,.7);
+    animation: spin 24s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .intro h1 {
+    font-size: clamp(2.2rem, 6vw, 4.2rem); font-weight: 800; letter-spacing: .35em;
+    color: var(--gold-bright); text-shadow: 0 0 40px rgba(201,162,39,.55);
+    padding-left: .35em;
+  }
+  .intro .story {
+    max-width: 620px; font-size: 1.25rem; line-height: 1.9; color: var(--bone);
+    font-style: italic; min-height: 7.2em;
+  }
+  .intro .story em { color: var(--gold-bright); font-style: normal; }
+  .btn-gold {
+    font-family: 'Cinzel', serif; font-size: 1rem; letter-spacing: .18em;
+    background: linear-gradient(180deg, #3a2f14, #241d0c);
+    color: var(--gold-bright); border: 1px solid var(--gold-dim);
+    padding: .85rem 2.6rem; cursor: pointer; border-radius: 2px;
+    text-transform: uppercase; transition: all .25s;
+  }
+  .btn-gold:hover { border-color: var(--gold-bright); box-shadow: 0 0 24px rgba(201,162,39,.35); color: #fff3c8; }
+  .intro .skip { background: none; border: none; color: var(--bone-dim); cursor: pointer; font-family: 'EB Garamond', serif; font-size: .95rem; text-decoration: underline; }
+  .intro .skip:hover { color: var(--bone); }
+
+  /* ── Layout ── */
+  .game { display: none; grid-template-columns: 300px 1fr 340px; gap: 18px; padding: 18px; max-width: 1500px; margin: 0 auto; min-height: 100vh; }
+  .game.active { display: grid; }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(33,29,25,.92), rgba(23,20,18,.94));
+    border: 1px solid #3d3428;
+    border-image: linear-gradient(180deg, #55482f, #2a241b) 1;
+    padding: 16px;
+  }
+  .panel h2 {
+    color: var(--gold); font-size: .95rem; letter-spacing: .22em; text-transform: uppercase;
+    border-bottom: 1px solid #3d3428; padding-bottom: 10px; margin-bottom: 14px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .panel h2 .sub { color: var(--bone-dim); font-size: .75rem; letter-spacing: .05em; text-transform: none; font-family: 'EB Garamond', serif; }
+
+  /* ── Topbar: Multiplikator-Kette ── */
+  .topbar {
+    grid-column: 1 / -1; display: flex; align-items: center; justify-content: center;
+    gap: 14px; flex-wrap: wrap; padding: 12px 16px;
+  }
+  .mult-chip { font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 600; text-shadow: 0 0 14px currentColor; }
+  .mult-x { color: var(--bone-dim); font-size: .95rem; }
+  .mult-total { color: var(--gold-bright); font-size: 1.4rem; padding-left: 10px; border-left: 1px solid #3d3428; }
+
+  /* ── Mitte: Runenkreis + Score ── */
+  .center { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .score-line { text-align: center; }
+  .score-line .score { font-family: 'Cinzel', serif; font-size: 2.6rem; font-weight: 800; color: var(--gold-bright); text-shadow: 0 0 30px rgba(201,162,39,.45); }
+  .score-line .label { color: var(--bone-dim); letter-spacing: .3em; text-transform: uppercase; font-size: .8rem; }
+  .score-line .rate { color: var(--ember); font-size: 1.05rem; font-style: italic; }
+
+  .ritual { position: relative; width: min(420px, 62vw); aspect-ratio: 1; }
+  .ritual .rune-img {
+    position: absolute; inset: 12%; border-radius: 50%;
+    background: url('../../assets/generated/01-aschenkrone-runenkreis.jpg') center/cover;
+    opacity: .9; box-shadow: 0 0 80px 4px rgba(201,162,39,.22), inset 0 0 60px rgba(0,0,0,.8);
+    animation: spin 40s linear infinite;
+  }
+  .ritual svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .ritual circle.track { fill: none; stroke: rgba(216,203,179,.08); }
+  .ritual circle.arc { fill: none; stroke-linecap: round; filter: drop-shadow(0 0 5px currentColor); transition: none; }
+
+  .fernziel { width: 100%; max-width: 560px; }
+  .fernziel .bar-label { display: flex; justify-content: space-between; font-size: .9rem; color: var(--bone-dim); margin-bottom: 5px; }
+  .fernziel .bar-label b { color: var(--gold); font-family: 'Cinzel', serif; letter-spacing: .1em; }
+  .bar { height: 14px; background: #0d0b09; border: 1px solid #3d3428; border-radius: 7px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold-bright)); width: 0%; border-radius: 7px; transition: width .4s; box-shadow: 0 0 12px rgba(201,162,39,.6); }
+
+  /* ── Seelenfeuer (Einheiten) ── */
+  .unit {
+    border: 1px solid #3a3226; background: rgba(23,20,18,.6); padding: 12px; margin-bottom: 12px;
+    display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center;
+    position: relative; overflow: hidden; cursor: pointer; user-select: none;
+    transition: border-color .15s, background .15s;
+  }
+  .unit:hover:not(.locked) { border-color: var(--gold); background: rgba(33,29,25,.85); }
+  .unit:active:not(.locked) { background: rgba(43,37,29,.9); }
+  .unit.locked { opacity: .45; filter: grayscale(.6); }
+  .unit .sigil {
+    width: 44px; height: 44px; border-radius: 50%; border: 2px solid currentColor;
+    display: grid; place-items: center; font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.15rem;
+    background: radial-gradient(circle, rgba(0,0,0,.5), transparent); text-shadow: 0 0 10px currentColor;
+    position: relative;
+  }
+  .unit .sigil::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 50%;
+    background: conic-gradient(currentColor calc(var(--p) * 1turn), transparent 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+    opacity: .95;
+  }
+  .unit .info .name { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--bone); }
+  .unit .info .stats { font-size: .85rem; color: var(--bone-dim); }
+  .unit .info .stats b { color: currentColor; }
+  .unit .cost {
+    grid-column: 1 / -1; border-top: 1px solid #3a3226; padding-top: 8px;
+    font-size: .92rem; color: var(--gold-bright);
+  }
+  .unit.dim .cost { opacity: .45; }
+  .unit.ready { border-color: var(--ember); }
+  .unit.ready .cost { color: var(--ember); }
+
+  /* ── Rechte Spalte ── */
+  .reinc-panel .preview { font-size: 1rem; line-height: 1.8; margin-bottom: 12px; }
+  .reinc-panel .preview b { color: var(--gold-bright); font-family: 'Cinzel', serif; }
+  .reinc-note { color: var(--bone-dim); font-size: .85rem; font-style: italic; margin-top: 8px; min-height: 2.4em; }
+  .btn-reinc { width: 100%; padding: 12px; font-size: 1.05rem; }
+  .btn-reinc.dim { opacity: .4; cursor: default; box-shadow: none; }
+
+  /* ── Boss ── */
+  .boss .boss-name { font-family: 'Cinzel', serif; color: var(--bone); font-size: 1.05rem; margin-bottom: 4px; }
+  .boss .boss-title { color: var(--blood); font-size: .85rem; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 10px; }
+  .hpbar { height: 18px; background: #0d0b09; border: 1px solid #4a2020; border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  .hpbar > div { height: 100%; width: 100%; background: linear-gradient(90deg, #5c1616, #a83232); transition: width .3s; }
+  .boss .hp-num { font-size: .85rem; color: var(--bone-dim); text-align: right; margin-bottom: 10px; }
+  .boss-log { font-size: .85rem; color: var(--bone-dim); font-style: italic; min-height: 3.6em; line-height: 1.5; }
+  .boss.dead .hpbar > div { background: #333; }
+
+  /* ── Chronik / Log ── */
+  .chronik { max-height: 180px; overflow-y: auto; font-size: .88rem; line-height: 1.65; }
+  .chronik p { border-left: 2px solid #3d3428; padding-left: 10px; margin-bottom: 8px; color: var(--bone-dim); }
+  .chronik p.gold { color: var(--gold); border-color: var(--gold-dim); }
+
+  .kapitel-badge {
+    grid-column: 1 / -1; text-align: center; color: var(--bone-dim);
+    letter-spacing: .4em; text-transform: uppercase; font-size: .78rem; padding-bottom: 4px;
+  }
+  .kapitel-badge b { color: var(--gold); }
+
+  @media (max-width: 1100px) { .game { grid-template-columns: 1fr; } .ritual { margin: 0 auto; } }
+
+  /* ── Mockup-Ende ── */
+  .endnote { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 2rem; background: rgba(6,5,4,.85); }
+  .endnote.show { display: flex; }
+  .endnote .box {
+    max-width: 580px; text-align: center; padding: 2.4rem;
+    background: linear-gradient(180deg, rgba(33,29,25,.98), rgba(23,20,18,.98));
+    border: 1px solid var(--gold-dim); box-shadow: 0 0 60px rgba(201,162,39,.25);
+  }
+  .endnote h2 { color: var(--gold-bright); font-size: 1.5rem; letter-spacing: .18em; margin-bottom: 1rem; }
+  .endnote p { color: var(--bone); font-size: 1.08rem; line-height: 1.8; font-style: italic; margin-bottom: 1.6rem; }
+  .endnote .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .endnote a.btn-gold { text-decoration: none; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="ember-field" id="emberField"></div>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<div class="intro" id="intro">
+  <div class="intro-rune"></div>
+  <h1>ASCHENKRONE</h1>
+  <div class="story" id="storyText"></div>
+  <button class="btn-gold" id="storyNext">Weiter</button>
+  <button class="skip" id="storySkip">Intro überspringen</button>
+</div>
+
+<!-- ═══════════ SPIEL ═══════════ -->
+<div class="game" id="game">
+  <div class="kapitel-badge">Kapitel I — <b>Die Glut unter der Asche</b></div>
+
+  <div class="topbar panel" id="topbar"></div>
+
+  <!-- Linke Spalte: Seelenfeuer -->
+  <div class="panel">
+    <h2>Seelenfeuer <span class="sub">deine Gefährten</span></h2>
+    <div id="units"></div>
+  </div>
+
+  <!-- Mitte -->
+  <div class="center">
+    <div class="score-line">
+      <div class="label">Seelen</div>
+      <div class="score" id="score">0</div>
+      <div class="rate" id="rate">+0 Seelen / Umdrehung</div>
+    </div>
+    <div class="ritual">
+      <div class="rune-img"></div>
+      <svg viewBox="0 0 100 100" id="rings"></svg>
+    </div>
+    <div class="fernziel panel">
+      <div class="bar-label"><b>WEG ZUM WELTENRISS</b><span id="fzPct">0.00 %</span></div>
+      <div class="bar"><div id="fzBar"></div></div>
+      <div class="reinc-note" style="min-height:auto">Erreiche <b style="color:var(--gold)">1e12 Seelen</b>, um Kapitel II zu öffnen: <i>Jenseits der Grenze</i>.</div>
+    </div>
+  </div>
+
+  <!-- Rechte Spalte -->
+  <div style="display:flex; flex-direction:column; gap:18px;">
+    <div class="panel reinc-panel">
+      <h2>Reinkarnation <span class="sub" id="reincCount">0 Leben</span></h2>
+      <div class="preview">
+        Glut der Erinnerung: <b id="pmultNow">×1</b> → <b id="pmultNext">×1</b><br>
+        Seelen-Exponent: <b id="pexpNow">^1.00</b>
+      </div>
+      <button class="btn-gold btn-reinc dim" id="reincBtn">Ritual beginnen</button>
+      <div class="reinc-note" id="reincNote">Ab 1 M Seelen: Stirb — und kehre stärker zurück.</div>
+    </div>
+
+    <div class="panel boss" id="bossPanel">
+      <h2>Weltenwächter <span class="sub">Bosskampf</span></h2>
+      <div class="boss-name" id="bossName">Gravlok, der Aschenvater</div>
+      <div class="boss-title">Wächter des ersten Siegels</div>
+      <div class="hpbar"><div id="bossHp"></div></div>
+      <div class="hp-num" id="bossHpNum"></div>
+      <div class="boss-log" id="bossLog">Jede Umdrehung deiner Seelenfeuer verwundet ihn. Besiege ihn, um das zweite Seelenfeuer zu entfachen.</div>
+    </div>
+
+    <div class="panel">
+      <h2>Chronik</h2>
+      <div class="chronik" id="chronik"></div>
+    </div>
+  </div>
+</div>
+
+<div class="endnote" id="endnote">
+  <div class="box">
+    <h2>⚔ MOCKUP-ENDE ERREICHT</h2>
+    <p>Der Weg zum Weltenriss ist voll — mehr Inhalt hat dieses Mockup nicht.<br>
+    Kapitel II (»Jenseits der Grenze«) entsteht erst im echten Spiel.<br>
+    Du kannst weiterspielen oder zum nächsten Test wechseln.</p>
+    <div class="row">
+      <button class="btn-gold" onclick="this.closest('.endnote').classList.remove('show')">Weiterspielen</button>
+      <a class="btn-gold" href="../02-system-erwacht/index.html">Nächstes Mockup →</a>
+      <a class="btn-gold" href="../index.html">Zur Übersicht</a>
+    </div>
+  </div>
+</div>
+
+<script src="../lib/break_eternity.min.js"></script>
+<script>
+'use strict';
+/* ═══════════ Story ═══════════ */
+const STORY = [
+  'Du stirbst auf einem Schlachtfeld, das nicht deines war.<br>Kein Licht. Kein Urteil. Nur — <em>Asche</em>.',
+  'Eine Stimme wie berstendes Gold: <em>»Trage die Krone, die niemand wollte.<br>Sammle die Seelen, die niemand zählt.«</em>',
+  'Du erwachst unter dem toten Baum. In deiner Hand: eine Krone aus Asche.<br>Sie ist noch <em>warm</em>.'
+];
+let storyIdx = 0;
+const storyText = document.getElementById('storyText');
+const showStory = () => {
+  storyText.innerHTML = STORY[storyIdx];
+  document.getElementById('storyNext').textContent = storyIdx < STORY.length - 1 ? 'Weiter' : 'Die Krone aufsetzen';
+};
+const startGame = () => {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game').classList.add('active');
+  log('Die Krone glimmt. Dein erstes Seelenfeuer entzündet sich von selbst.', true);
+};
+document.getElementById('storyNext').addEventListener('pointerdown', () => {
+  if (storyIdx < STORY.length - 1) { storyIdx++; showStory(); } else startGame();
+});
+document.getElementById('storySkip').addEventListener('pointerdown', startGame);
+showStory();
+
+/* ═══════════ Zahlenformat ═══════════ */
+const SUF = ['', ' K', ' M', ' B', ' T', ' Qa', ' Qi', ' Sx', ' Sp', ' Oc', ' No', ' Dc'];
+function fmt(x) {
+  const d = x instanceof Decimal ? x : new Decimal(x);
+  if (d.lt(1000)) {
+    const n = d.toNumber();
+    return n < 10 && n % 1 !== 0 ? n.toFixed(1) : Math.floor(n).toString();
+  }
+  const e = d.log10().toNumber();
+  const tier = Math.floor(e / 3);
+  if (tier < SUF.length) {
+    const v = d.div(Decimal.pow(10, tier * 3)).toNumber();
+    return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + SUF[tier];
+  }
+  if (e < 1e6) return d.toExponential(2).replace('+', '');
+  return d.toString();
+}
+
+/* ═══════════ Einheiten (= Revo-Kreise) ═══════════ */
+const UNITS = [
+  { name: 'Aschenritter',   rune: 'ᚨ', color: '#e2622b', baseLap: 2.0,  baseCost: 15,    unlocked: true  },
+  { name: 'Glutmagierin',   rune: 'ᛗ', color: '#c9a227', baseLap: 3.4,  baseCost: 400,   unlocked: false },
+  { name: 'Seelenwandler',  rune: 'ᛋ', color: '#9a7bb8', baseLap: 5.5,  baseCost: 30000, unlocked: false },
+  { name: 'Kronenschatten', rune: 'ᛟ', color: '#d8cbb3', baseLap: 9.0,  baseCost: 4e6,   unlocked: false }
+];
+UNITS.forEach(u => Object.assign(u, { level: 5, cap: 25, asc: 0, progress: 0, growth: 1.18, cost: new Decimal(u.baseCost) }));
+// Macht steigt AUSSCHLIESSLICH durch Spieler-Käufe (Level/Erweckung) — Design-Entscheidung #1
+const unitMult = u => (1 + 0.3 * (u.level - 5)) * Math.pow(2.6, u.asc);
+
+const S = { score: new Decimal(0), pMult: new Decimal(1), pExp: 1, reincs: 0, reincClicks: 0, bossTier: 0, bossHp: 50, bossMax: 50, bossDead: false, globalMult: 1 };
+const BOSSES = ['Gravlok, der Aschenvater', 'Ilvess, Herrin der Dornen', 'Der Namenlose König'];
+
+const lapTime = u => u.baseLap / (1 + 0.09 * (u.level - 5)) / (1 + S.reincs * 0.15);
+const product = () => UNITS.reduce((a, u) => a.mul(u.unlocked ? unitMult(u) : 1), new Decimal(1));
+const gainPerLap = () => product().mul(S.pMult).pow(S.pExp).mul(S.globalMult);
+const reincGain = () => S.score.gte(1e6) ? Decimal.max(S.pMult, S.score.div(1e6).sqrt().mul(6).floor()) : S.pMult;
+
+/* ═══════════ DOM-Aufbau ═══════════ */
+const unitsEl = document.getElementById('units');
+UNITS.forEach((u, i) => {
+  const div = document.createElement('div');
+  div.className = 'unit locked'; div.style.color = u.color; div.id = 'unit' + i;
+  div.dataset.idx = i;
+  div.innerHTML = `
+    <div class="sigil" style="--p:0">${u.rune}</div>
+    <div class="info">
+      <div class="name">${u.name}</div>
+      <div class="stats"></div>
+    </div>
+    <div class="cost">—</div>`;
+  unitsEl.appendChild(div);
+});
+const ringsSvg = document.getElementById('rings');
+UNITS.forEach((u, i) => {
+  const r = 46 - i * 5.5;
+  ringsSvg.innerHTML += `<circle class="track" cx="50" cy="50" r="${r}" stroke-width="3.2"/>
+    <circle class="arc" cx="50" cy="50" r="${r}" stroke-width="3.2" stroke="${u.color}"
+      stroke-dasharray="${2 * Math.PI * r}" stroke-dashoffset="${2 * Math.PI * r}" id="arc${i}"/>`;
+});
+
+unitsEl.addEventListener('pointerdown', e => {
+  const card = e.target.closest('.unit'); if (!card) return;
+  const i = +card.dataset.idx, u = UNITS[i];
+  if (!u.unlocked) return;
+  if (u.level >= u.cap) ascend(i); else buyLevel(i);
+});
+
+function buyLevel(i) {
+  const u = UNITS[i];
+  if (!u.unlocked || u.level >= u.cap || S.score.lt(u.cost)) return;
+  S.score = S.score.sub(u.cost); u.level++;
+  u.cost = u.cost.mul(u.growth); // Kosten laufen weiter, kein Reset — Design-Entscheidung #2
+}
+function ascend(i) {
+  const u = UNITS[i];
+  if (u.level < u.cap) return;
+  u.asc++; u.cap += 10; u.growth += 0.05;
+  log(`${u.name} durchläuft die <b>Erweckung ${u.asc}</b> — Macht ×2,6, neues Cap ${u.cap}, künftiges Training wird teurer (×${u.growth.toFixed(2)}).`, true);
+}
+
+/* ═══════════ Reinkarnation ═══════════ */
+const reincBtn = document.getElementById('reincBtn');
+reincBtn.addEventListener('pointerdown', () => {
+  if (S.score.lt(1e6)) return;
+  S.reincClicks++;
+  if (S.reincClicks < 5) {
+    document.getElementById('reincNote').innerHTML = `Das Ritual verlangt Gewissheit. <b style="color:var(--gold)">Noch ${5 - S.reincClicks}× bestätigen.</b>`;
+    return;
+  }
+  const g = reincGain();
+  S.reincs++; S.pMult = g; S.pExp = 1 + S.reincs * 0.05; S.score = new Decimal(0); S.reincClicks = 0;
+  UNITS.forEach(u => { u.level = 5; u.progress = 0; u.asc = 0; u.cap = 25; u.growth = 1.18; u.cost = new Decimal(u.baseCost); });
+  // Gegner-Kette resettet pro Leben (inkl. ihrer Belohnungs-Multiplikatoren)
+  S.bossTier = 0; S.bossMax = 50; S.bossHp = 50; S.bossDead = false; S.globalMult = 1;
+  document.getElementById('bossPanel').classList.remove('dead');
+  document.getElementById('bossName').textContent = BOSSES[0];
+  document.getElementById('bossLog').innerHTML = 'Die Wächter kehren mit deinem neuen Leben zurück. Jede Umdrehung verwundet sie.';
+  document.getElementById('reincNote').textContent = 'Asche zu Asche. Glut zu Glut.';
+  log(`<b>Reinkarnation ${S.reincs}.</b> Du stirbst — und erwachst mit Glut der Erinnerung ×${fmt(g)} und Exponent ^${S.pExp.toFixed(2)}.`, true);
+});
+
+/* ═══════════ Boss ═══════════ */
+function hitBoss(dmg) {
+  if (S.bossDead) return;
+  S.bossHp -= dmg;
+  if (S.bossHp <= 0) {
+    S.bossTier++;
+    const rewardMult = 3 * S.bossTier;
+    S.globalMult *= rewardMult;
+    if (S.bossTier === 1 && !UNITS[1].unlocked) { UNITS[1].unlocked = true; log('Das zweite Seelenfeuer entfacht: <b>Die Glutmagierin</b> tritt an deine Seite.', true); }
+    if (S.bossTier === 2 && !UNITS[2].unlocked) { UNITS[2].unlocked = true; log('Das dritte Seelenfeuer entfacht: <b>Der Seelenwandler</b> folgt deinem Ruf.', true); }
+    if (S.bossTier === 3 && !UNITS[3].unlocked) { UNITS[3].unlocked = true; log('Das letzte Seelenfeuer entfacht: <b>Der Kronenschatten</b> verneigt sich.', true); }
+    log(`Wächter besiegt! Alle Seelengewinne <b>×${rewardMult}</b>.`, true);
+    if (S.bossTier < BOSSES.length) {
+      S.bossMax = 50 * Math.pow(30, S.bossTier); S.bossHp = S.bossMax;
+      document.getElementById('bossName').textContent = BOSSES[S.bossTier];
+      document.getElementById('bossLog').innerHTML = `Ein neuer Wächter erhebt sich aus der Asche …`;
+    } else {
+      S.bossDead = true;
+      document.getElementById('bossPanel').classList.add('dead');
+      document.getElementById('bossName').textContent = '— Das Seelental ist still —';
+      document.getElementById('bossLog').innerHTML = 'Alle Wächter des Kapitels sind gefallen. Der <b>Weltenriss</b> wartet.';
+    }
+  }
+}
+
+/* ═══════════ Chronik ═══════════ */
+const chronikEl = document.getElementById('chronik');
+function log(html, gold = false) {
+  const p = document.createElement('p');
+  if (gold) p.className = 'gold';
+  p.innerHTML = html;
+  chronikEl.prepend(p);
+  while (chronikEl.children.length > 30) chronikEl.lastChild.remove();
+}
+
+/* ═══════════ Game-Loop ═══════════ */
+let last = performance.now();
+let firstUnlockHints = { magierin: false };
+function tick() {
+  const now = performance.now();
+  const dt = Math.min((now - last) / 1000, 2); last = now;
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    u.progress += dt / lapTime(u);
+    const laps = Math.floor(u.progress);
+    if (laps > 0) {
+      u.progress -= laps;
+      S.score = S.score.add(gainPerLap().mul(laps));
+      hitBoss(laps * Math.min(product().toNumber(), 1e6) * 0.5 * (1 + i));
+    }
+  });
+  render();
+}
+
+/* ═══════════ Render ═══════════ */
+const $ = id => document.getElementById(id);
+function render() {
+  $('score').textContent = fmt(S.score) + ' ✦';
+  $('rate').textContent = `+${fmt(gainPerLap())} Seelen / Umdrehung`;
+
+  // Topbar-Kette
+  let chain = '';
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    chain += `${i > 0 ? '<span class="mult-x">×</span>' : ''}<span class="mult-chip" style="color:${u.color}">${fmt(unitMult(u))}</span>`;
+  });
+  chain += `<span class="mult-total cinzel">= ×${fmt(product())}</span>`;
+  if (S.pMult.gt(1)) chain += `<span class="mult-x">· Glut ×${fmt(S.pMult)} ^${S.pExp.toFixed(2)}</span>`;
+  $('topbar').innerHTML = chain;
+
+  // Einheiten
+  UNITS.forEach((u, i) => {
+    const el = $('unit' + i);
+    el.classList.toggle('locked', !u.unlocked);
+    el.querySelector('.sigil').style.setProperty('--p', u.progress.toFixed(3));
+    el.querySelector('.stats').innerHTML = u.unlocked
+      ? `Lv ${u.level}/${u.cap} · Macht <b>×${fmt(unitMult(u))}</b> · ${(1 / lapTime(u)).toFixed(2)} U/s`
+      : `<i>Verschlossen — besiege den ${i}. Wächter</i>`;
+    const costEl = el.querySelector('.cost');
+    if (!u.unlocked) { costEl.textContent = '—'; el.classList.remove('ready'); el.classList.remove('dim'); }
+    else if (u.level >= u.cap) { costEl.textContent = 'Erweckung bereit — Karte antippen'; el.classList.add('ready'); el.classList.remove('dim'); }
+    else { costEl.textContent = `Stärken: ${fmt(u.cost)} ✦`; el.classList.remove('ready'); el.classList.toggle('dim', S.score.lt(u.cost)); }
+    const arc = $('arc' + i);
+    const c = 2 * Math.PI * (46 - i * 5.5);
+    arc.style.strokeDashoffset = u.unlocked ? c * (1 - u.progress) : c;
+  });
+
+  // Reinkarnation
+  $('pmultNow').textContent = '×' + fmt(S.pMult);
+  $('pmultNext').textContent = '×' + fmt(reincGain());
+  $('pexpNow').textContent = '^' + S.pExp.toFixed(2);
+  $('reincCount').textContent = S.reincs + (S.reincs === 1 ? ' Leben' : ' Leben');
+  reincBtn.classList.toggle('dim', S.score.lt(1e6));
+  reincBtn.textContent = S.reincClicks > 0 ? `Ritual … (${S.reincClicks}/5)` : 'Ritual beginnen';
+
+  // Boss
+  if (!S.bossDead) {
+    $('bossHp').style.width = Math.max(0, S.bossHp / S.bossMax * 100) + '%';
+    $('bossHpNum').textContent = `${fmt(Math.max(0, S.bossHp))} / ${fmt(S.bossMax)} HP`;
+  } else { $('bossHp').style.width = '0%'; $('bossHpNum').textContent = '—'; }
+
+  // Fernziel
+  const pct = Math.min(100, Math.max(0, S.score.max(1).log10().toNumber() / 12 * 100));
+  $('fzBar').style.width = pct + '%';
+  $('fzPct').textContent = pct.toFixed(2) + ' %';
+  if (!S.endShown && S.score.gte(1e12)) { S.endShown = true; $('endnote').classList.add('show'); }
+
+  // Hinweis
+  if (!firstUnlockHints.magierin && S.score.gte(200)) {
+    firstUnlockHints.magierin = true;
+    log('Die Wächter spüren dich. Jede Umdrehung deiner Feuer fügt ihnen Schaden zu.');
+  }
+}
+
+/* ═══════════ Asche-Partikel ═══════════ */
+const field = document.getElementById('emberField');
+for (let i = 0; i < 26; i++) {
+  const p = document.createElement('div');
+  p.className = 'ember-p';
+  p.style.left = Math.random() * 100 + 'vw';
+  p.style.top = (60 + Math.random() * 50) + 'vh';
+  p.style.animationDuration = (9 + Math.random() * 14) + 's';
+  p.style.animationDelay = (Math.random() * 12) + 's';
+  p.style.transform = `scale(${0.5 + Math.random()})`;
+  field.appendChild(p);
+}
+
+last = performance.now();
+setInterval(tick, 100);
+</script>
+</body>
+</html>

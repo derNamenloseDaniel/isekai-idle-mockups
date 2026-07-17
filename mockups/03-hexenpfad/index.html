@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hexenpfad — Mockup 3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Uncial+Antiqua&display=swap');
+
+  :root {
+    --parch: #e8d9b8;
+    --parch-2: #dcc99f;
+    --parch-dark: #c9b183;
+    --ink: #3a2c1a;
+    --ink-dim: #6d5a3d;
+    --silver: #7d8a94;
+    --steel: #4a5560;
+    --blood: #8c2f22;
+    --swamp: #5c6b3c;
+    --amber: #b0762a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #241d12;
+    color: var(--ink);
+    font-family: 'IM Fell English', Georgia, serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  h1, h2, .uncial { font-family: 'Uncial Antiqua', 'IM Fell English', serif; }
+
+  .bg {
+    position: fixed; inset: 0; z-index: -2;
+    background: url('../../assets/generated/03-hexenpfad-keyart.jpg') center 35%/cover no-repeat;
+    filter: brightness(.55) saturate(.85);
+  }
+  .bg::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(20,16,9,.5), rgba(20,16,9,.88) 85%); }
+
+  /* ── Pergament-Panels ── */
+  .panel {
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255,250,230,.5), transparent 60%),
+      linear-gradient(160deg, var(--parch) 0%, var(--parch-2) 55%, var(--parch-dark) 100%);
+    border: 1px solid #8a744c;
+    border-radius: 3px;
+    box-shadow: 0 3px 0 #1a140b, 0 10px 30px -8px rgba(0,0,0,.85), inset 0 0 40px rgba(138,116,76,.25);
+    padding: 16px;
+    position: relative;
+  }
+  .panel::before, .panel::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 7px;
+    background: radial-gradient(circle at 6px 50%, transparent 3px, rgba(58,44,26,.14) 3px 4px, transparent 4px) repeat-x;
+    background-size: 14px 7px; opacity: .5;
+  }
+  .panel::before { top: 2px; } .panel::after { bottom: 2px; }
+  .panel h2 {
+    font-size: 1.05rem; letter-spacing: .1em; color: var(--ink);
+    border-bottom: 2px solid rgba(58,44,26,.35); padding-bottom: 8px; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .panel h2 .sub { font-family: 'IM Fell English', serif; font-style: italic; font-size: .78rem; color: var(--ink-dim); letter-spacing: 0; }
+
+  /* ── Intro ── */
+  .intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse at center, #2e2517 0%, #16110a 80%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1.6rem; padding: 2rem; text-align: center; transition: opacity 1s ease;
+  }
+  .intro.hidden { opacity: 0; pointer-events: none; }
+  .intro .medallion {
+    width: 110px; height: 110px; border-radius: 50%;
+    border: 4px solid var(--silver);
+    background: radial-gradient(circle at 35% 30%, #6a7680, #2c343c 70%);
+    display: grid; place-items: center; font-size: 3rem; color: #cdd6dd;
+    box-shadow: 0 0 40px rgba(125,138,148,.35);
+    animation: medPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes medPulse { 0%,100% { transform: scale(1); box-shadow: 0 0 24px rgba(125,138,148,.25);} 50% { transform: scale(1.06); box-shadow: 0 0 54px rgba(125,138,148,.55);} }
+  .intro h1 { font-size: clamp(2rem, 5.5vw, 3.6rem); color: var(--parch); letter-spacing: .12em; text-shadow: 0 4px 24px rgba(0,0,0,.8); }
+  .intro .story { max-width: 640px; font-size: 1.28rem; line-height: 1.9; color: var(--parch-2); font-style: italic; min-height: 7em; }
+  .intro .story em { color: var(--amber); font-style: normal; }
+  .btn-main {
+    font-family: 'IM Fell English', serif; font-size: 1.1rem;
+    background: linear-gradient(180deg, #5a4526, #3a2c17);
+    color: var(--parch); border: 1px solid #8a744c; border-radius: 3px;
+    padding: .8rem 2.6rem; cursor: pointer; letter-spacing: .08em;
+    box-shadow: 0 3px 0 #16110a; transition: all .2s;
+  }
+  .btn-main:hover { background: linear-gradient(180deg, #6b5330, #46351d); color: #fff6dd; }
+  .intro .skip { background: none; border: none; color: #7d6c4d; cursor: pointer; font-family: 'IM Fell English', serif; font-size: .95rem; text-decoration: underline; }
+  .intro .skip:hover { color: var(--parch-2); }
+
+  /* ── Layout ── */
+  .game { display: none; grid-template-columns: 330px 1fr 330px; gap: 16px; padding: 16px; max-width: 1520px; margin: 0 auto; }
+  .game.active { display: grid; }
+  .col { display: flex; flex-direction: column; gap: 16px; }
+  .kapitel { grid-column: 1/-1; text-align: center; color: var(--parch-2); letter-spacing: .3em; font-size: .8rem; text-transform: uppercase; }
+  .kapitel b { color: var(--amber); }
+
+  /* ── Topbar ── */
+  .topbar { grid-column: 1/-1; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 10px 16px; }
+  .mult-chip { font-size: 1.3rem; font-weight: bold; }
+  .mult-x { color: var(--ink-dim); }
+  .mult-total { font-size: 1.35rem; padding-left: 12px; border-left: 2px solid rgba(58,44,26,.3); color: var(--blood); }
+
+  /* ── Mitte: Medaillon + Score ── */
+  .center { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .score-panel { text-align: center; padding: 14px 34px; }
+  .score-panel .label { font-style: italic; color: var(--ink-dim); font-size: .9rem; }
+  .score-panel .score { font-family: 'Uncial Antiqua', serif; font-size: 2.5rem; color: var(--ink); }
+  .score-panel .rate { color: var(--blood); font-size: 1rem; font-style: italic; }
+  .medallion-stage { position: relative; width: min(390px, 58vw); aspect-ratio: 1; }
+  .medallion-stage svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .medallion-stage .wolf {
+    position: absolute; inset: 30%; border-radius: 50%;
+    border: 5px solid var(--silver);
+    background: radial-gradient(circle at 35% 30%, #6a7680, #232a31 75%);
+    display: grid; place-items: center; font-size: 2.6rem; color: #cdd6dd;
+    box-shadow: 0 6px 24px rgba(0,0,0,.6), inset 0 0 18px rgba(0,0,0,.6);
+    animation: medPulse 3.4s ease-in-out infinite;
+  }
+  circle.track { fill: none; stroke: rgba(232,217,184,.14); }
+  circle.arc { fill: none; stroke-linecap: round; filter: drop-shadow(0 0 3px currentColor); }
+
+  .fernziel { width: 100%; max-width: 540px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: .88rem; color: var(--ink-dim); margin-bottom: 5px; }
+  .bar-label b { color: var(--blood); letter-spacing: .06em; }
+  .bar { height: 13px; background: rgba(58,44,26,.25); border: 1px solid #8a744c; border-radius: 2px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--amber), var(--blood)); width: 0%; transition: width .4s; }
+
+  /* ── Schule / Einheiten ── */
+  .unit {
+    border: 1px solid rgba(138,116,76,.7); background: rgba(255,250,230,.28); border-radius: 3px;
+    padding: 11px; margin-bottom: 10px; display: grid; grid-template-columns: 46px 1fr; gap: 10px; align-items: center;
+    cursor: pointer; user-select: none; transition: border-color .15s, background .15s;
+  }
+  .unit:hover:not(.locked) { border-color: var(--amber); background: rgba(255,250,230,.5); }
+  .unit:active:not(.locked) { background: rgba(255,250,230,.65); }
+  .unit.locked { opacity: .45; }
+  .unit .glyph {
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 2px solid currentColor; display: grid; place-items: center;
+    font-size: 1.45rem; position: relative; background: rgba(255,252,240,.5);
+  }
+  .unit .glyph::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 50%;
+    background: conic-gradient(currentColor calc(var(--p) * 1turn), transparent 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  }
+  .unit .name { font-weight: bold; font-size: 1rem; }
+  .unit .stats { font-size: .82rem; color: var(--ink-dim); }
+  .unit .stats b { color: currentColor; }
+  .unit .cost {
+    grid-column: 1 / -1; border-top: 1px solid rgba(138,116,76,.5); padding-top: 7px;
+    font-size: .9rem; font-weight: bold; color: var(--amber);
+  }
+  .unit.dim .cost { opacity: .5; }
+  .unit.ready { border-color: var(--swamp); }
+  .unit.ready .cost { color: var(--swamp); }
+
+  /* ── Auftrag/Boss ── */
+  .contract .cname { font-size: 1.15rem; font-weight: bold; }
+  .contract .creward { font-style: italic; color: var(--amber); font-size: .85rem; margin-bottom: 8px; }
+  .hpbar { height: 15px; background: rgba(58,44,26,.25); border: 1px solid var(--blood); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+  .hpbar > div { height: 100%; width: 100%; background: linear-gradient(90deg, #5e1d14, var(--blood)); transition: width .3s; }
+  .contract .hp-num { font-size: .82rem; color: var(--ink-dim); text-align: right; margin-bottom: 8px; }
+  .contract .clog { font-size: .88rem; font-style: italic; color: var(--ink-dim); min-height: 3.2em; line-height: 1.5; }
+  .contract .stamp {
+    position: absolute; right: 14px; top: 44px; transform: rotate(12deg);
+    border: 3px solid var(--blood); color: var(--blood); border-radius: 4px;
+    padding: 2px 10px; font-weight: bold; letter-spacing: .2em; font-size: .9rem; opacity: 0;
+    text-transform: uppercase; pointer-events: none;
+  }
+  .contract.done .stamp { opacity: .85; }
+
+  /* ── Bestiarium ── */
+  .bestiary img { width: 100%; border-radius: 2px; border: 1px solid #8a744c; filter: sepia(.25); display: block; }
+  .bestiary .caption { font-style: italic; font-size: .85rem; color: var(--ink-dim); margin-top: 8px; line-height: 1.5; }
+
+  /* ── Reinkarnation (Pfad) ── */
+  .reinc .preview { line-height: 1.8; font-size: .98rem; margin-bottom: 10px; }
+  .reinc .preview b { color: var(--blood); }
+  .btn-reinc { width: 100%; padding: 10px; font-size: 1rem; }
+  .btn-reinc.dim { opacity: .45; cursor: default; }
+  .note { font-size: .85rem; font-style: italic; color: var(--ink-dim); margin-top: 8px; min-height: 2.4em; }
+
+  @media (max-width: 1100px) { .game { grid-template-columns: 1fr; } .medallion-stage { margin: 0 auto; } }
+
+  /* ── Mockup-Ende ── */
+  .endnote { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 2rem; background: rgba(22,17,10,.85); }
+  .endnote.show { display: flex; }
+  .endnote .box {
+    max-width: 600px; text-align: center; padding: 2.4rem;
+    background: linear-gradient(160deg, var(--parch) 0%, var(--parch-2) 55%, var(--parch-dark) 100%);
+    border: 1px solid #8a744c; box-shadow: 0 10px 40px rgba(0,0,0,.85);
+  }
+  .endnote h2 { color: var(--blood); font-size: 1.4rem; letter-spacing: .1em; margin-bottom: 1rem; }
+  .endnote p { color: var(--ink); font-size: 1.1rem; line-height: 1.8; font-style: italic; margin-bottom: 1.6rem; }
+  .endnote .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .endnote a.btn-main { text-decoration: none; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<div class="intro" id="intro">
+  <div class="medallion">🐺</div>
+  <h1>Hexenpfad</h1>
+  <div class="story" id="storyText"></div>
+  <button class="btn-main" id="storyNext">Weiter</button>
+  <button class="skip" id="storySkip">Intro überspringen</button>
+</div>
+
+<!-- ═══════════ SPIEL ═══════════ -->
+<div class="game" id="game">
+  <div class="kapitel">Kapitel I — <b>Der Sumpf von Morhen</b></div>
+  <div class="topbar panel" id="topbar"></div>
+
+  <!-- Links -->
+  <div class="col">
+    <div class="panel">
+      <h2>Die Schule des Wolfes <span class="sub">deine Zunft</span></h2>
+      <div id="units"></div>
+    </div>
+    <div class="panel reinc">
+      <h2>Der Pfad <span class="sub">Neuanfang</span></h2>
+      <div class="preview">
+        Narben der Erfahrung: <b id="pmultNow">×1</b> → <b id="pmultNext">×1</b><br>
+        Zeichen-Exponent: <b id="pexpNow">^1.00</b> · Pfade: <b id="reincCount">0</b>
+      </div>
+      <button class="btn-main btn-reinc dim" id="reincBtn">Den Pfad neu gehen</button>
+      <div class="note" id="reincNote">Ab 1 M Trophäen: Häng das Schwert an den Nagel — und beginn von vorn. Die Narben bleiben.</div>
+    </div>
+  </div>
+
+  <!-- Mitte -->
+  <div class="center">
+    <div class="score-panel panel">
+      <div class="label">Trophäen &amp; Kronen</div>
+      <div class="score" id="score">0</div>
+      <div class="rate" id="rate">+0 / Patrouille</div>
+    </div>
+    <div class="medallion-stage">
+      <svg viewBox="0 0 100 100" id="rings"></svg>
+      <div class="wolf">🐺</div>
+    </div>
+    <div class="fernziel panel">
+      <div class="bar-label"><b>GERÜCHTE ÜBER DEN RISS VON ZERRIKANIEN</b><span id="fzPct">0.00 %</span></div>
+      <div class="bar"><div id="fzBar"></div></div>
+      <div class="note" style="min-height:auto">Bei <b style="color:var(--blood)">1e12 Trophäen</b> öffnet Kapitel II: <i>Jenseits des Risses</i>.</div>
+    </div>
+  </div>
+
+  <!-- Rechts -->
+  <div class="col">
+    <div class="panel contract" id="contractPanel">
+      <h2>Aushang <span class="sub">Monsterauftrag</span></h2>
+      <div class="stamp">Erfüllt</div>
+      <div class="cname" id="bossName">Der Moorschrecken</div>
+      <div class="creward" id="bossReward">Belohnung: ×3 auf alle Trophäen · neues Zunftmitglied</div>
+      <div class="hpbar"><div id="bossHp"></div></div>
+      <div class="hp-num" id="bossHpNum"></div>
+      <div class="clog" id="bossLog">Deine Patrouillen stellen das Biest automatisch. Jede vollendete Runde ist ein Schwerthieb.</div>
+    </div>
+    <div class="panel bestiary">
+      <h2>Bestiarium <span class="sub">Seite 1 von 81</span></h2>
+      <img src="../../assets/generated/03-hexenpfad-bestiarium.jpg" alt="Bestiariumsskizze eines Greifs">
+      <div class="caption">»Greif, Erzgreif. Schwach gegen Grapeschuss-Öl und Aard. Vorliebe für Pferde
+      und Dramatik.« — Feldnotiz, Eintrag 14. In der Vollversion: 81 Einträge mit permanenten Boni (= Revo-Zoo).</div>
+    </div>
+  </div>
+</div>
+
+<div class="endnote" id="endnote">
+  <div class="box">
+    <h2>⚜ Ende des Mockups — der Aushang ist leer</h2>
+    <p>Die Gerüchte über den Riss von Zerrikanien sind bestätigt — doch Kapitel II
+    (»Jenseits des Risses«) schreibt erst das echte Spiel.<br>
+    Häng das Schwert an den Nagel oder zieh weiter zum nächsten Test.</p>
+    <div class="row">
+      <button class="btn-main" onclick="this.closest('.endnote').classList.remove('show')">Weiterspielen</button>
+      <a class="btn-main" href="../04-sternenschrei/index.html">Nächstes Mockup →</a>
+      <a class="btn-main" href="../index.html">Zur Übersicht</a>
+    </div>
+  </div>
+</div>
+
+<script src="../lib/break_eternity.min.js"></script>
+<script>
+'use strict';
+/* ═══════════ Story ═══════════ */
+const STORY = [
+  'Du warst Bibliothekar. Dann kam der Blitz — und ein Bücherregal voller <em>Monsterkunde</em>.<br>Man sagt, man nimmt mit, was man zuletzt berührt hat.',
+  'Du erwachst im Sumpf von Morhen. Um deinen Hals: ein <em>Wolfsmedaillon</em>.<br>Es vibriert. Es vibriert eigentlich immer.',
+  'Ein alter Hexer mustert dich: <em>»Frisches Blut? Gut. Die Aufträge stapeln sich,<br>und die Monster zahlen keine Steuern.«</em>'
+];
+let storyIdx = 0;
+const storyText = document.getElementById('storyText');
+const showStory = () => {
+  storyText.innerHTML = STORY[storyIdx];
+  document.getElementById('storyNext').textContent = storyIdx < STORY.length - 1 ? 'Weiter' : 'Das Medaillon anlegen';
+};
+const startGame = () => {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game').classList.add('active');
+};
+document.getElementById('storyNext').addEventListener('pointerdown', () => {
+  if (storyIdx < STORY.length - 1) { storyIdx++; showStory(); } else startGame();
+});
+document.getElementById('storySkip').addEventListener('pointerdown', startGame);
+showStory();
+
+/* ═══════════ Format ═══════════ */
+const SUF = ['', ' K', ' M', ' B', ' T', ' Qa', ' Qi', ' Sx', ' Sp', ' Oc', ' No', ' Dc'];
+function fmt(x) {
+  const d = x instanceof Decimal ? x : new Decimal(x);
+  if (d.lt(1000)) {
+    const n = d.toNumber();
+    return n < 10 && n % 1 !== 0 ? n.toFixed(1) : Math.floor(n).toString();
+  }
+  const e = d.log10().toNumber();
+  const tier = Math.floor(e / 3);
+  if (tier < SUF.length) {
+    const v = d.div(Decimal.pow(10, tier * 3)).toNumber();
+    return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + SUF[tier];
+  }
+  if (e < 1e6) return d.toExponential(2).replace('+', '');
+  return d.toString();
+}
+
+/* ═══════════ Zunft (= Revo-Kreise) ═══════════ */
+const UNITS = [
+  { name: 'Vesna, die Jägerin',  glyph: '🏹', color: '#8c5a22', baseLap: 2.1, baseCost: 14,   unlocked: true  },
+  { name: 'Aldric mit dem Öl',   glyph: '⚗️', color: '#5c6b3c', baseLap: 3.6, baseCost: 380,  unlocked: false },
+  { name: 'Greta Zeichenhand',   glyph: '🖐️', color: '#5a4a8c', baseLap: 5.8, baseCost: 28e3, unlocked: false },
+  { name: 'Der Alte vom Pfad',   glyph: '⚔️', color: '#5e2d24', baseLap: 9.2, baseCost: 3.5e6,unlocked: false }
+];
+UNITS.forEach(u => Object.assign(u, { level: 1, cap: 20, asc: 0, progress: 0, growth: 1.18, cost: new Decimal(u.baseCost) }));
+// Ruhm steigt AUSSCHLIESSLICH durch Spieler-Käufe — Design-Entscheidung #1
+const unitMult = u => (1 + 0.3 * (u.level - 1)) * Math.pow(2.6, u.asc);
+
+const S = { score: new Decimal(0), pMult: new Decimal(1), pExp: 1, reincs: 0, reincClicks: 0, bossTier: 0, bossHp: 50, bossMax: 50, bossDead: false, globalMult: 1 };
+const BOSSES = [
+  { n: 'Der Moorschrecken', r: '×3 auf alle Trophäen · Aldric schließt sich an' },
+  { n: 'Greif von der Hügelfeste', r: '×6 auf alle Trophäen · Greta schließt sich an' },
+  { n: 'Leshy des alten Waldes', r: '×9 auf alle Trophäen · Der Alte schließt sich an' }
+];
+
+const lapTime = u => u.baseLap / (1 + 0.1 * (u.level - 1)) / (1 + S.reincs * 0.15);
+const product = () => UNITS.reduce((a, u) => a.mul(u.unlocked ? unitMult(u) : 1), new Decimal(1));
+const gainPerLap = () => product().mul(S.pMult).pow(S.pExp).mul(S.globalMult);
+const reincGain = () => S.score.gte(1e6) ? Decimal.max(S.pMult, S.score.div(1e6).sqrt().mul(6).floor()) : S.pMult;
+
+/* ═══════════ DOM ═══════════ */
+const unitsEl = document.getElementById('units');
+UNITS.forEach((u, i) => {
+  const d = document.createElement('div');
+  d.className = 'unit locked'; d.style.color = u.color; d.id = 'unit' + i;
+  d.dataset.idx = i;
+  d.innerHTML = `
+    <div class="glyph" style="--p:0">${u.glyph}</div>
+    <div><div class="name">${u.name}</div><div class="stats"></div></div>
+    <div class="cost">—</div>`;
+  unitsEl.appendChild(d);
+});
+const ringsSvg = document.getElementById('rings');
+UNITS.forEach((u, i) => {
+  const r = 47 - i * 5;
+  ringsSvg.innerHTML += `<circle class="track" cx="50" cy="50" r="${r}" stroke-width="2.8"/>
+    <circle class="arc" cx="50" cy="50" r="${r}" stroke-width="2.8" stroke="${u.color}"
+      stroke-dasharray="${2 * Math.PI * r}" stroke-dashoffset="${2 * Math.PI * r}" id="arc${i}"/>`;
+});
+unitsEl.addEventListener('pointerdown', e => {
+  const card = e.target.closest('.unit'); if (!card) return;
+  const i = +card.dataset.idx, u = UNITS[i];
+  if (!u.unlocked) return;
+  if (u.level >= u.cap) { u.asc++; u.cap += 10; u.growth += 0.05; }
+  else if (S.score.gte(u.cost)) { S.score = S.score.sub(u.cost); u.level++; u.cost = u.cost.mul(u.growth); }
+});
+
+/* ═══════════ Pfad (= Prestige) ═══════════ */
+const reincBtn = document.getElementById('reincBtn');
+reincBtn.addEventListener('pointerdown', () => {
+  if (S.score.lt(1e6)) return;
+  S.reincClicks++;
+  if (S.reincClicks < 5) {
+    document.getElementById('reincNote').innerHTML = `Bist du sicher, Hexer? <b>Noch ${5 - S.reincClicks}× bestätigen.</b>`;
+    return;
+  }
+  const g = reincGain();
+  S.reincs++; S.pMult = g; S.pExp = 1 + S.reincs * 0.05; S.score = new Decimal(0); S.reincClicks = 0;
+  UNITS.forEach(u => { u.level = 1; u.progress = 0; u.asc = 0; u.cap = 20; u.growth = 1.18; u.cost = new Decimal(u.baseCost); });
+  // Aufträge resetten pro Pfad (inkl. ihrer Belohnungs-Multiplikatoren)
+  S.bossTier = 0; S.bossMax = 50; S.bossHp = 50; S.bossDead = false; S.globalMult = 1;
+  document.getElementById('bossName').textContent = BOSSES[0].n;
+  document.getElementById('bossReward').textContent = 'Belohnung: ' + BOSSES[0].r;
+  document.getElementById('bossLog').innerHTML = 'Neuer Pfad, neue Aushänge: Die Monster sind zurück.';
+  document.getElementById('reincNote').textContent = 'Ein neuer Pfad. Dieselben Sümpfe. Bessere Instinkte.';
+});
+
+/* ═══════════ Auftrag/Boss ═══════════ */
+function hitBoss(dmg) {
+  if (S.bossDead) return;
+  S.bossHp -= dmg;
+  if (S.bossHp <= 0) {
+    S.bossTier++;
+    const rm = 3 * S.bossTier;
+    S.globalMult *= rm;
+    if (S.bossTier <= 3 && !UNITS[S.bossTier].unlocked) UNITS[S.bossTier].unlocked = true;
+    const panel = document.getElementById('contractPanel');
+    panel.classList.add('done');
+    setTimeout(() => panel.classList.remove('done'), 1600);
+    if (S.bossTier < BOSSES.length) {
+      S.bossMax = 50 * Math.pow(30, S.bossTier); S.bossHp = S.bossMax;
+      document.getElementById('bossName').textContent = BOSSES[S.bossTier].n;
+      document.getElementById('bossReward').textContent = 'Belohnung: ' + BOSSES[S.bossTier].r;
+      document.getElementById('bossLog').innerHTML = 'Ein neuer Aushang flattert am Brett. Die Zunft wetzt die Klingen.';
+    } else {
+      S.bossDead = true;
+      document.getElementById('bossName').textContent = '— Keine offenen Aufträge —';
+      document.getElementById('bossLog').innerHTML = 'Der Sumpf ist still. Zu still. Die Gerüchte über den <b>Riss</b> verdichten sich.';
+    }
+  }
+}
+
+/* ═══════════ Loop + Render ═══════════ */
+const $ = id => document.getElementById(id);
+let last = performance.now();
+function tick() {
+  const now = performance.now();
+  const dt = Math.min((now - last) / 1000, 2); last = now;
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    u.progress += dt / lapTime(u);
+    const laps = Math.floor(u.progress);
+    if (laps > 0) {
+      u.progress -= laps;
+      S.score = S.score.add(gainPerLap().mul(laps));
+      hitBoss(laps * Math.min(product().toNumber(), 1e6) * 0.5 * (1 + i));
+    }
+  });
+  render();
+}
+function render() {
+  $('score').textContent = fmt(S.score) + ' ⚜';
+  $('rate').textContent = `+${fmt(gainPerLap())} / Patrouille`;
+
+  let chain = '';
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    chain += `${i > 0 ? '<span class="mult-x">×</span>' : ''}<span class="mult-chip" style="color:${u.color}">${fmt(unitMult(u))}</span>`;
+  });
+  chain += `<span class="mult-total">= ×${fmt(product())}</span>`;
+  if (S.pMult.gt(1)) chain += `<span class="mult-x">· Narben ×${fmt(S.pMult)} ^${S.pExp.toFixed(2)}</span>`;
+  $('topbar').innerHTML = chain;
+
+  UNITS.forEach((u, i) => {
+    const el = $('unit' + i);
+    el.classList.toggle('locked', !u.unlocked);
+    el.querySelector('.glyph').style.setProperty('--p', u.progress.toFixed(3));
+    el.querySelector('.stats').innerHTML = u.unlocked
+      ? `St ${u.level}/${u.cap} · Ruhm <b>×${fmt(unitMult(u))}</b> · ${(1 / lapTime(u)).toFixed(2)} P/s`
+      : `<i>Wartet in der Taverne — erfülle Auftrag ${i}</i>`;
+    const costEl = el.querySelector('.cost');
+    if (!u.unlocked) { costEl.textContent = '—'; el.classList.remove('ready'); el.classList.remove('dim'); }
+    else if (u.level >= u.cap) { costEl.textContent = 'Mutagen bereit — Karte antippen'; el.classList.add('ready'); el.classList.remove('dim'); }
+    else { costEl.textContent = `Training: ${fmt(u.cost)} ⚜`; el.classList.remove('ready'); el.classList.toggle('dim', S.score.lt(u.cost)); }
+    const c = 2 * Math.PI * (47 - i * 5);
+    $('arc' + i).style.strokeDashoffset = u.unlocked ? c * (1 - u.progress) : c;
+  });
+
+  $('pmultNow').textContent = '×' + fmt(S.pMult);
+  $('pmultNext').textContent = '×' + fmt(reincGain());
+  $('pexpNow').textContent = '^' + S.pExp.toFixed(2);
+  $('reincCount').textContent = S.reincs;
+  reincBtn.classList.toggle('dim', S.score.lt(1e6));
+  reincBtn.textContent = S.reincClicks > 0 ? `Bestätigen … (${S.reincClicks}/5)` : 'Den Pfad neu gehen';
+
+  if (!S.bossDead) {
+    $('bossHp').style.width = Math.max(0, S.bossHp / S.bossMax * 100) + '%';
+    $('bossHpNum').textContent = `${fmt(Math.max(0, S.bossHp))} / ${fmt(S.bossMax)} HP`;
+  } else { $('bossHp').style.width = '0%'; $('bossHpNum').textContent = '—'; }
+
+  const pct = Math.min(100, Math.max(0, S.score.max(1).log10().toNumber() / 12 * 100));
+  $('fzBar').style.width = pct + '%';
+  $('fzPct').textContent = pct.toFixed(2) + ' %';
+  if (!S.endShown && S.score.gte(1e12)) { S.endShown = true; $('endnote').classList.add('show'); }
+}
+last = performance.now();
+setInterval(tick, 100);
+</script>
+</body>
+</html>

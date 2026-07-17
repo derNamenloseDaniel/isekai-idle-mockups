@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sternenschrei — Mockup 4</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@400;600;700&family=Alegreya:ital,wght@0,400;0,500;1,400&display=swap');
+
+  :root {
+    --night: #0a1020;
+    --night-2: #101a30;
+    --ice: #a8d8f0;
+    --ice-bright: #dff2ff;
+    --aurora-g: #4be3a8;
+    --aurora-v: #9a7bd8;
+    --frost-border: rgba(168, 216, 240, .22);
+    --text: #cfe0ec;
+    --text-dim: #74889c;
+    --torch: #e8a04a;
+    --blood: #c04848;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--night); color: var(--text);
+    font-family: 'Alegreya', Georgia, serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  h1, h2, h3, .sc { font-family: 'Cormorant SC', Georgia, serif; }
+
+  .bg {
+    position: fixed; inset: 0; z-index: -3;
+    background: url('../../assets/generated/04-sternenschrei-keyart.jpg') center 25%/cover no-repeat;
+    filter: brightness(.55);
+  }
+  .bg::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(10,16,32,.35), rgba(10,16,32,.92) 82%); }
+
+  /* Aurora-Schleier */
+  .aurora {
+    position: fixed; inset: -20% -10%; z-index: -2; pointer-events: none; opacity: .3;
+    background:
+      radial-gradient(ellipse 60% 22% at 30% 18%, var(--aurora-g), transparent 65%),
+      radial-gradient(ellipse 55% 20% at 70% 12%, var(--aurora-v), transparent 65%);
+    filter: blur(30px);
+    animation: auroraShift 16s ease-in-out infinite alternate;
+  }
+  @keyframes auroraShift {
+    from { transform: translateX(-3%) skewY(-2deg); opacity: .22; }
+    to   { transform: translateX(3%) skewY(2deg); opacity: .4; }
+  }
+  /* Sternfeld */
+  .stars { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  .star { position: absolute; border-radius: 50%; background: var(--ice-bright); animation: twinkle ease-in-out infinite alternate; }
+  @keyframes twinkle { from { opacity: .15; } to { opacity: .9; } }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(16,26,48,.82), rgba(10,16,32,.88));
+    border: 1px solid var(--frost-border);
+    border-radius: 4px;
+    padding: 16px;
+    box-shadow: 0 8px 28px -10px rgba(0,0,0,.85), inset 0 1px 0 rgba(168,216,240,.12);
+  }
+  .panel h2 {
+    font-family: 'Cormorant SC', serif; font-weight: 600; font-size: 1.1rem; letter-spacing: .22em;
+    color: var(--ice); border-bottom: 1px solid var(--frost-border);
+    padding-bottom: 8px; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .panel h2 .sub { font-family: 'Alegreya', serif; font-style: italic; font-size: .78rem; color: var(--text-dim); letter-spacing: 0; }
+
+  /* ── Intro ── */
+  .intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse at 50% 20%, #14203c 0%, #05080f 80%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1.8rem; padding: 2rem; text-align: center; transition: opacity 1.2s ease;
+  }
+  .intro.hidden { opacity: 0; pointer-events: none; }
+  .intro h1 {
+    font-size: clamp(2.4rem, 6vw, 4.4rem); font-weight: 700; letter-spacing: .3em; padding-left: .3em;
+    color: var(--ice-bright); text-shadow: 0 0 48px rgba(168,216,240,.5);
+  }
+  .intro .rune-row { display: flex; gap: 1.6rem; font-size: 1.9rem; color: var(--ice); opacity: .8; letter-spacing: .5em; }
+  .intro .story { max-width: 640px; font-size: 1.28rem; line-height: 1.95; font-style: italic; color: var(--text); min-height: 7.5em; }
+  .intro .story em { color: var(--torch); font-style: normal; }
+  .btn {
+    font-family: 'Cormorant SC', serif; font-size: 1.1rem; font-weight: 600; letter-spacing: .2em;
+    background: linear-gradient(180deg, rgba(168,216,240,.14), rgba(168,216,240,.04));
+    color: var(--ice-bright); border: 1px solid rgba(168,216,240,.45); border-radius: 3px;
+    padding: .8rem 2.6rem; cursor: pointer; transition: all .25s;
+  }
+  .btn:hover { box-shadow: 0 0 28px rgba(168,216,240,.35); background: rgba(168,216,240,.22); }
+  .intro .skip { background: none; border: none; color: var(--text-dim); cursor: pointer; font-family: 'Alegreya', serif; font-size: .95rem; text-decoration: underline; }
+  .intro .skip:hover { color: var(--text); }
+
+  /* ── Layout ── */
+  .game { display: none; grid-template-columns: 340px 1fr 340px; gap: 16px; padding: 16px; max-width: 1540px; margin: 0 auto; }
+  .game.active { display: grid; }
+  .col { display: flex; flex-direction: column; gap: 16px; }
+  .kapitel { grid-column: 1/-1; text-align: center; letter-spacing: .45em; text-transform: uppercase; font-size: .76rem; color: var(--text-dim); }
+  .kapitel b { color: var(--ice); }
+
+  .topbar { grid-column: 1/-1; display: flex; align-items: center; justify-content: center; gap: 13px; flex-wrap: wrap; padding: 10px; }
+  .mult-chip { font-family: 'Cormorant SC', serif; font-size: 1.35rem; font-weight: 700; text-shadow: 0 0 14px currentColor; }
+  .mult-x { color: var(--text-dim); }
+  .mult-total { color: var(--ice-bright); font-size: 1.4rem; padding-left: 12px; border-left: 1px solid var(--frost-border); }
+
+  /* ── Mitte ── */
+  .center { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .score-line { text-align: center; }
+  .score-line .label { letter-spacing: .5em; text-transform: uppercase; font-size: .75rem; color: var(--text-dim); }
+  .score-line .score { font-family: 'Cormorant SC', serif; font-size: 2.8rem; font-weight: 700; color: var(--ice-bright); text-shadow: 0 0 32px rgba(168,216,240,.55); }
+  .score-line .rate { color: var(--aurora-g); font-size: 1rem; font-style: italic; }
+
+  .const-stage { position: relative; width: min(430px, 62vw); aspect-ratio: 1; }
+  .const-stage .const-img {
+    position: absolute; inset: 10%; border-radius: 50%;
+    background: url('../../assets/generated/04-sternenschrei-konstellation.jpg') center/cover;
+    opacity: .85; box-shadow: 0 0 70px rgba(168,216,240,.25), inset 0 0 50px rgba(5,8,15,.9);
+  }
+  .const-stage svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  circle.track { fill: none; stroke: rgba(207,224,236,.08); }
+  circle.arc { fill: none; stroke-linecap: round; filter: drop-shadow(0 0 5px currentColor); }
+
+  .fernziel { width: 100%; max-width: 560px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: .85rem; color: var(--text-dim); margin-bottom: 5px; letter-spacing: .1em; }
+  .bar-label b { color: var(--ice); font-family: 'Cormorant SC', serif; letter-spacing: .18em; }
+  .bar { height: 13px; background: rgba(5,8,15,.8); border: 1px solid var(--frost-border); border-radius: 7px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--aurora-v), var(--ice)); width: 0%; transition: width .4s; box-shadow: 0 0 14px rgba(168,216,240,.7); }
+  .note { font-size: .84rem; font-style: italic; color: var(--text-dim); margin-top: 8px; min-height: 2.2em; }
+
+  /* ── Worte der Macht (Einheiten) ── */
+  .unit {
+    border: 1px solid var(--frost-border); background: rgba(5,8,15,.5); border-radius: 4px;
+    padding: 12px; margin-bottom: 10px; position: relative; overflow: hidden;
+    cursor: pointer; user-select: none; transition: border-color .15s, background .15s;
+  }
+  .unit:hover:not(.locked) { border-color: var(--ice); background: rgba(10,16,32,.65); }
+  .unit:active:not(.locked) { background: rgba(14,22,42,.75); }
+  .unit.locked { opacity: .42; }
+  .unit .head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .unit .name { font-family: 'Cormorant SC', serif; font-weight: 700; font-size: 1.08rem; }
+  .unit .word { font-size: 1.15rem; letter-spacing: .3em; opacity: .9; }
+  .unit .stats { font-size: .82rem; color: var(--text-dim); margin-bottom: 8px; }
+  .unit .stats b { color: currentColor; }
+  .runebar { height: 9px; border-radius: 5px; background: rgba(207,224,236,.08); overflow: hidden; margin-bottom: 9px; }
+  .runebar > div { height: 100%; width: 0%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+  .unit .cost {
+    border-top: 1px solid var(--frost-border); padding-top: 7px;
+    font-size: .88rem; color: var(--ice);
+  }
+  .unit.dim .cost { opacity: .45; }
+  .unit.ready { border-color: var(--torch); }
+  .unit.ready .cost { color: var(--torch); }
+
+  /* ── Dova-Zyklus (Prestige) ── */
+  .reinc .preview { line-height: 1.85; font-size: .96rem; margin-bottom: 10px; }
+  .reinc .preview b { color: var(--torch); font-family: 'Cormorant SC', serif; font-size: 1.08rem; }
+  .btn-reinc { width: 100%; padding: 11px; border-color: rgba(232,160,74,.5); color: var(--torch); }
+  .btn-reinc:hover { box-shadow: 0 0 24px rgba(232,160,74,.35); background: rgba(232,160,74,.14); }
+  .btn-reinc.dim { opacity: .4; cursor: default; box-shadow: none; }
+
+  /* ── Boss ── */
+  .boss .bname { font-family: 'Cormorant SC', serif; font-weight: 700; font-size: 1.15rem; }
+  .boss .btitle { color: var(--blood); font-size: .78rem; letter-spacing: .3em; text-transform: uppercase; margin-bottom: 10px; }
+  .hpbar { height: 15px; background: rgba(5,8,15,.8); border: 1px solid rgba(192,72,72,.4); border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+  .hpbar > div { height: 100%; width: 100%; background: linear-gradient(90deg, #6e2222, var(--blood)); transition: width .3s; }
+  .boss .hp-num { font-size: .82rem; color: var(--text-dim); text-align: right; margin-bottom: 8px; }
+  .boss .blog { font-size: .86rem; font-style: italic; color: var(--text-dim); min-height: 3.2em; line-height: 1.55; }
+
+  /* ── Konstellations-Panel ── */
+  .skytree svg { width: 100%; display: block; }
+  .skytree .cap { font-size: .84rem; font-style: italic; color: var(--text-dim); margin-top: 6px; line-height: 1.5; }
+  .skytree .cap b { color: var(--ice); }
+
+  @media (max-width: 1100px) { .game { grid-template-columns: 1fr; } .const-stage { margin: 0 auto; } }
+
+  /* ── Mockup-Ende ── */
+  .endnote { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 2rem; background: rgba(5,8,15,.85); }
+  .endnote.show { display: flex; }
+  .endnote .box {
+    max-width: 600px; text-align: center; padding: 2.4rem;
+    background: linear-gradient(180deg, rgba(16,26,48,.98), rgba(10,16,32,.98));
+    border: 1px solid rgba(168,216,240,.45); border-radius: 4px;
+    box-shadow: 0 0 60px rgba(168,216,240,.25);
+  }
+  .endnote h2 { font-family: 'Cormorant SC', serif; color: var(--ice-bright); font-size: 1.5rem; letter-spacing: .2em; margin-bottom: 1rem; }
+  .endnote p { color: var(--text); font-size: 1.08rem; line-height: 1.85; font-style: italic; margin-bottom: 1.6rem; }
+  .endnote .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .endnote a.btn { text-decoration: none; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="aurora"></div>
+<div class="stars" id="starField"></div>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<div class="intro" id="intro">
+  <div class="rune-row">ᚦ ᚢ ᛉ</div>
+  <h1>STERNENSCHREI</h1>
+  <div class="story" id="storyText"></div>
+  <button class="btn" id="storyNext">Weiter</button>
+  <button class="skip" id="storySkip">Intro überspringen</button>
+</div>
+
+<!-- ═══════════ SPIEL ═══════════ -->
+<div class="game" id="game">
+  <div class="kapitel">Kapitel I — <b>Die Stimme unter dem Eis</b></div>
+  <div class="topbar panel" id="topbar"></div>
+
+  <!-- Links -->
+  <div class="col">
+    <div class="panel">
+      <h2>Worte der Macht <span class="sub">dein Thu&#8217;um</span></h2>
+      <div id="units"></div>
+    </div>
+    <div class="panel reinc">
+      <h2>Dova-Zyklus <span class="sub">Wiedergeburt</span></h2>
+      <div class="preview">
+        Drachenseele: <b id="pmultNow">×1</b> → <b id="pmultNext">×1</b><br>
+        Stimm-Exponent: <b id="pexpNow">^1.00</b> · Zyklen: <b id="reincCount">0</b>
+      </div>
+      <button class="btn btn-reinc dim" id="reincBtn">Zyklus vollenden</button>
+      <div class="note" id="reincNote">Ab 1 M Stimmkraft: Der Drache in dir stirbt — und wird neu geboren.</div>
+    </div>
+  </div>
+
+  <!-- Mitte -->
+  <div class="center">
+    <div class="score-line">
+      <div class="label">Stimmkraft</div>
+      <div class="score" id="score">0</div>
+      <div class="rate" id="rate">+0 / Echo</div>
+    </div>
+    <div class="const-stage">
+      <div class="const-img"></div>
+      <svg viewBox="0 0 100 100" id="rings"></svg>
+    </div>
+    <div class="fernziel panel">
+      <div class="bar-label"><b>DAS TOR VON SOVNGARDE</b><span id="fzPct">0.00 %</span></div>
+      <div class="bar"><div id="fzBar"></div></div>
+      <div class="note" style="min-height:auto">Bei <b style="color:var(--ice)">1e12 Stimmkraft</b> öffnet Kapitel II: <i>Hinter dem Himmel</i>.</div>
+    </div>
+  </div>
+
+  <!-- Rechts -->
+  <div class="col">
+    <div class="panel boss">
+      <h2>Uralter Feind <span class="sub">Weltenfresser</span></h2>
+      <div class="bname" id="bossName">Frostgeist Ymirrak</div>
+      <div class="btitle">Hüter des ersten Wortes</div>
+      <div class="hpbar"><div id="bossHp"></div></div>
+      <div class="hp-num" id="bossHpNum"></div>
+      <div class="blog" id="bossLog">Jedes Echo deiner Worte trifft ihn wie Donner. Besiege ihn, um das zweite Wort zu lernen.</div>
+    </div>
+    <div class="panel skytree">
+      <h2>Sternbild des Kriegers <span class="sub">Skilltree-Teaser</span></h2>
+      <svg viewBox="0 0 300 170" id="constSvg"></svg>
+      <div class="cap">Jede <b>Erweckung</b> entzündet einen Stern. In der Vollversion: begehbare
+      Konstellations-Skilltrees pro Layer (= Revo-Infinity-Baum in Skyrim-Optik).</div>
+    </div>
+  </div>
+</div>
+
+<div class="endnote" id="endnote">
+  <div class="box">
+    <h2>ᛋ MOCKUP-ENDE ERREICHT</h2>
+    <p>Deine Stimme trägt bis an das Tor von Sovngarde — weiter reicht dieses Mockup nicht.<br>
+    Kapitel II (»Hinter dem Himmel«) entsteht erst im echten Spiel.<br>
+    Sprich weiter mit dem Himmel oder ziehe zum nächsten Test.</p>
+    <div class="row">
+      <button class="btn" onclick="this.closest('.endnote').classList.remove('show')">Weiterspielen</button>
+      <a class="btn" href="../05-anderswelt/index.html">Nächstes Mockup →</a>
+      <a class="btn" href="../index.html">Zur Übersicht</a>
+    </div>
+  </div>
+</div>
+
+<script src="../lib/break_eternity.min.js"></script>
+<script>
+'use strict';
+/* ═══════════ Story ═══════════ */
+const STORY = [
+  'Der Lawinenabgang begrub dich beim Wandern. Zumindest dachtest du das —<br>bis du unter <em>fremden Sternen</em> wieder atmen konntest.',
+  'Ein uraltes Grab. Eine Wand voller Runen. Als du sie berührst,<br>brennt sich ein Wort in deine Kehle: <em>DOV</em>. Es schmeckt nach Gewitter.',
+  'Irgendwo über den Bergen antwortet ein Schrei.<br>Die Einheimischen flüstern: <em>»Der Himmel hat wieder eine Stimme gewählt.«</em>'
+];
+let storyIdx = 0;
+const storyText = document.getElementById('storyText');
+const showStory = () => {
+  storyText.innerHTML = STORY[storyIdx];
+  document.getElementById('storyNext').textContent = storyIdx < STORY.length - 1 ? 'Weiter' : 'Das erste Wort sprechen';
+};
+const startGame = () => {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game').classList.add('active');
+};
+document.getElementById('storyNext').addEventListener('pointerdown', () => {
+  if (storyIdx < STORY.length - 1) { storyIdx++; showStory(); } else startGame();
+});
+document.getElementById('storySkip').addEventListener('pointerdown', startGame);
+showStory();
+
+/* ═══════════ Format ═══════════ */
+const SUF = ['', ' K', ' M', ' B', ' T', ' Qa', ' Qi', ' Sx', ' Sp', ' Oc', ' No', ' Dc'];
+function fmt(x) {
+  const d = x instanceof Decimal ? x : new Decimal(x);
+  if (d.lt(1000)) {
+    const n = d.toNumber();
+    return n < 10 && n % 1 !== 0 ? n.toFixed(1) : Math.floor(n).toString();
+  }
+  const e = d.log10().toNumber();
+  const tier = Math.floor(e / 3);
+  if (tier < SUF.length) {
+    const v = d.div(Decimal.pow(10, tier * 3)).toNumber();
+    return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + SUF[tier];
+  }
+  if (e < 1e6) return d.toExponential(2).replace('+', '');
+  return d.toString();
+}
+
+/* ═══════════ Worte der Macht (= Revo-Kreise) ═══════════ */
+const UNITS = [
+  { name: 'FUS — Kraft',     word: 'ᚠᚢᛋ', color: '#a8d8f0', baseLap: 2.0, baseCost: 13,   unlocked: true  },
+  { name: 'RO — Gleichgewicht', word: 'ᚱᛟ', color: '#4be3a8', baseLap: 3.5, baseCost: 360,  unlocked: false },
+  { name: 'DAH — Stoß',      word: 'ᛞᚨᚺ', color: '#9a7bd8', baseLap: 5.6, baseCost: 26e3, unlocked: false },
+  { name: 'YOL — Feuer',     word: 'ᛃᛟᛚ', color: '#e8a04a', baseLap: 9.0, baseCost: 3.2e6,unlocked: false }
+];
+UNITS.forEach(u => Object.assign(u, { level: 1, cap: 20, asc: 0, progress: 0, growth: 1.18, cost: new Decimal(u.baseCost) }));
+// Echo-Macht steigt AUSSCHLIESSLICH durch Spieler-Käufe — Design-Entscheidung #1
+const unitMult = u => (1 + 0.3 * (u.level - 1)) * Math.pow(2.6, u.asc);
+
+const S = { score: new Decimal(0), pMult: new Decimal(1), pExp: 1, reincs: 0, reincClicks: 0, bossTier: 0, bossHp: 50, bossMax: 50, bossDead: false, globalMult: 1, totalAsc: 0 };
+const BOSSES = ['Frostgeist Ymirrak', 'Trollkönig Barguk', 'Schattendrache Vulthurnax'];
+
+const lapTime = u => u.baseLap / (1 + 0.1 * (u.level - 1)) / (1 + S.reincs * 0.15);
+const product = () => UNITS.reduce((a, u) => a.mul(u.unlocked ? unitMult(u) : 1), new Decimal(1));
+const gainPerLap = () => product().mul(S.pMult).pow(S.pExp).mul(S.globalMult);
+const reincGain = () => S.score.gte(1e6) ? Decimal.max(S.pMult, S.score.div(1e6).sqrt().mul(6).floor()) : S.pMult;
+
+/* ═══════════ DOM ═══════════ */
+const unitsEl = document.getElementById('units');
+UNITS.forEach((u, i) => {
+  const d = document.createElement('div');
+  d.className = 'unit locked'; d.style.color = u.color; d.id = 'unit' + i;
+  d.dataset.idx = i;
+  d.innerHTML = `
+    <div class="head"><span class="name">${u.name}</span><span class="word">${u.word}</span></div>
+    <div class="stats"></div>
+    <div class="runebar"><div></div></div>
+    <div class="cost">—</div>`;
+  unitsEl.appendChild(d);
+});
+const ringsSvg = document.getElementById('rings');
+UNITS.forEach((u, i) => {
+  const r = 47 - i * 4.5;
+  ringsSvg.innerHTML += `<circle class="track" cx="50" cy="50" r="${r}" stroke-width="2.4"/>
+    <circle class="arc" cx="50" cy="50" r="${r}" stroke-width="2.4" stroke="${u.color}"
+      stroke-dasharray="${2 * Math.PI * r}" stroke-dashoffset="${2 * Math.PI * r}" id="arc${i}"/>`;
+});
+unitsEl.addEventListener('pointerdown', e => {
+  const card = e.target.closest('.unit'); if (!card) return;
+  const i = +card.dataset.idx, u = UNITS[i];
+  if (!u.unlocked) return;
+  if (u.level >= u.cap) { u.asc++; S.totalAsc++; u.cap += 10; u.growth += 0.05; lightStar(); }
+  else if (S.score.gte(u.cost)) { S.score = S.score.sub(u.cost); u.level++; u.cost = u.cost.mul(u.growth); }
+});
+
+/* ═══════════ Konstellation ═══════════ */
+const CONST_STARS = [
+  [40, 130], [85, 95], [130, 115], [150, 60], [195, 85], [235, 45], [265, 100]
+];
+const constSvg = document.getElementById('constSvg');
+(function buildConst() {
+  let lines = '';
+  for (let i = 0; i < CONST_STARS.length - 1; i++) {
+    const [x1, y1] = CONST_STARS[i], [x2, y2] = CONST_STARS[i + 1];
+    lines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(168,216,240,.25)" stroke-width="1"/>`;
+  }
+  let stars = CONST_STARS.map(([x, y], i) =>
+    `<circle cx="${x}" cy="${y}" r="4" fill="rgba(168,216,240,.18)" id="cstar${i}"/>`).join('');
+  constSvg.innerHTML = lines + stars;
+})();
+function lightStar() {
+  const idx = Math.min(S.totalAsc - 1, CONST_STARS.length - 1);
+  const s = document.getElementById('cstar' + idx);
+  if (s) { s.setAttribute('fill', '#dff2ff'); s.style.filter = 'drop-shadow(0 0 6px #a8d8f0)'; }
+}
+
+/* ═══════════ Dova-Zyklus (= Prestige) ═══════════ */
+const reincBtn = document.getElementById('reincBtn');
+reincBtn.addEventListener('pointerdown', () => {
+  if (S.score.lt(1e6)) return;
+  S.reincClicks++;
+  if (S.reincClicks < 5) {
+    document.getElementById('reincNote').innerHTML = `Der Himmel verlangt Gewissheit: <b style="color:var(--torch)">noch ${5 - S.reincClicks}× rufen.</b>`;
+    return;
+  }
+  const g = reincGain();
+  S.reincs++; S.pMult = g; S.pExp = 1 + S.reincs * 0.05; S.score = new Decimal(0); S.reincClicks = 0;
+  UNITS.forEach(u => { u.level = 1; u.progress = 0; u.asc = 0; u.cap = 20; u.growth = 1.18; u.cost = new Decimal(u.baseCost); });
+  // Hüter resetten pro Zyklus (inkl. ihrer Belohnungs-Multiplikatoren)
+  S.bossTier = 0; S.bossMax = 50; S.bossHp = 50; S.bossDead = false; S.globalMult = 1;
+  document.getElementById('bossName').textContent = BOSSES[0];
+  document.getElementById('bossLog').innerHTML = 'Mit dem neuen Zyklus erheben sich die Hüter erneut.';
+  document.getElementById('reincNote').textContent = 'Der Drache stirbt. Der Drache kehrt zurück. Der Himmel zählt mit.';
+});
+
+/* ═══════════ Boss ═══════════ */
+function hitBoss(dmg) {
+  if (S.bossDead) return;
+  S.bossHp -= dmg;
+  if (S.bossHp <= 0) {
+    S.bossTier++;
+    const rm = 3 * S.bossTier;
+    S.globalMult *= rm;
+    if (S.bossTier <= 3 && !UNITS[S.bossTier].unlocked) UNITS[S.bossTier].unlocked = true;
+    if (S.bossTier < BOSSES.length) {
+      S.bossMax = 50 * Math.pow(30, S.bossTier); S.bossHp = S.bossMax;
+      document.getElementById('bossName').textContent = BOSSES[S.bossTier];
+      document.getElementById('bossLog').innerHTML = `Ein neues Wort brennt in deiner Kehle (Gewinne <b>×${rm}</b>). Und etwas Größeres erwacht …`;
+    } else {
+      S.bossDead = true;
+      document.getElementById('bossName').textContent = '— Der Himmel ist still —';
+      document.getElementById('bossLog').innerHTML = `Alle Hüter sind gefallen. Hinter den Sternen wartet das <b>Tor von Sovngarde</b>.`;
+    }
+  }
+}
+
+/* ═══════════ Loop + Render ═══════════ */
+const $ = id => document.getElementById(id);
+let last = performance.now();
+function tick() {
+  const now = performance.now();
+  const dt = Math.min((now - last) / 1000, 2); last = now;
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    u.progress += dt / lapTime(u);
+    const laps = Math.floor(u.progress);
+    if (laps > 0) {
+      u.progress -= laps;
+      S.score = S.score.add(gainPerLap().mul(laps));
+      hitBoss(laps * Math.min(product().toNumber(), 1e6) * 0.5 * (1 + i));
+    }
+  });
+  render();
+}
+function render() {
+  $('score').textContent = fmt(S.score) + ' ᛋ';
+  $('rate').textContent = `+${fmt(gainPerLap())} / Echo`;
+
+  let chain = '';
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    chain += `${i > 0 ? '<span class="mult-x">×</span>' : ''}<span class="mult-chip" style="color:${u.color}">${fmt(unitMult(u))}</span>`;
+  });
+  chain += `<span class="mult-total sc">= ×${fmt(product())}</span>`;
+  if (S.pMult.gt(1)) chain += `<span class="mult-x">· Drachenseele ×${fmt(S.pMult)} ^${S.pExp.toFixed(2)}</span>`;
+  $('topbar').innerHTML = chain;
+
+  UNITS.forEach((u, i) => {
+    const el = $('unit' + i);
+    el.classList.toggle('locked', !u.unlocked);
+    el.querySelector('.runebar > div').style.width = (u.progress * 100).toFixed(1) + '%';
+    el.querySelector('.stats').innerHTML = u.unlocked
+      ? `St ${u.level}/${u.cap} · Echo <b>×${fmt(unitMult(u))}</b> · ${(1 / lapTime(u)).toFixed(2)} E/s`
+      : `<i>Unbekanntes Wort — besiege Hüter ${i}</i>`;
+    const costEl = el.querySelector('.cost');
+    if (!u.unlocked) { costEl.textContent = '—'; el.classList.remove('ready'); el.classList.remove('dim'); }
+    else if (u.level >= u.cap) { costEl.textContent = 'Erweckung bereit — Karte antippen ᛉ'; el.classList.add('ready'); el.classList.remove('dim'); }
+    else { costEl.textContent = `Meditieren: ${fmt(u.cost)} ᛋ`; el.classList.remove('ready'); el.classList.toggle('dim', S.score.lt(u.cost)); }
+    const c = 2 * Math.PI * (47 - i * 4.5);
+    $('arc' + i).style.strokeDashoffset = u.unlocked ? c * (1 - u.progress) : c;
+  });
+
+  $('pmultNow').textContent = '×' + fmt(S.pMult);
+  $('pmultNext').textContent = '×' + fmt(reincGain());
+  $('pexpNow').textContent = '^' + S.pExp.toFixed(2);
+  $('reincCount').textContent = S.reincs;
+  reincBtn.classList.toggle('dim', S.score.lt(1e6));
+  reincBtn.textContent = S.reincClicks > 0 ? `Rufen … (${S.reincClicks}/5)` : 'Zyklus vollenden';
+
+  if (!S.bossDead) {
+    $('bossHp').style.width = Math.max(0, S.bossHp / S.bossMax * 100) + '%';
+    $('bossHpNum').textContent = `${fmt(Math.max(0, S.bossHp))} / ${fmt(S.bossMax)} HP`;
+  } else { $('bossHp').style.width = '0%'; $('bossHpNum').textContent = '—'; }
+
+  const pct = Math.min(100, Math.max(0, S.score.max(1).log10().toNumber() / 12 * 100));
+  $('fzBar').style.width = pct + '%';
+  $('fzPct').textContent = pct.toFixed(2) + ' %';
+  if (!S.endShown && S.score.gte(1e12)) { S.endShown = true; $('endnote').classList.add('show'); }
+}
+
+/* ═══════════ Sternfeld ═══════════ */
+const sf = document.getElementById('starField');
+for (let i = 0; i < 70; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2.2 + .6;
+  s.style.cssText = `left:${Math.random() * 100}vw; top:${Math.random() * 100}vh; width:${sz}px; height:${sz}px;
+    animation-duration:${(1.5 + Math.random() * 3.5)}s; animation-delay:${Math.random() * 4}s;`;
+  sf.appendChild(s);
+}
+last = performance.now();
+setInterval(tick, 100);
+</script>
+</body>
+</html>

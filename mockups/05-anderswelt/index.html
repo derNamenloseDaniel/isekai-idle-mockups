@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anderswelt — Mockup 5</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;600&display=swap');
+
+  :root {
+    --sky: #cfe8f5;
+    --cream: #fdf8ec;
+    --cream-2: #f7eed9;
+    --leaf: #7cb069;
+    --leaf-dark: #4c7a3d;
+    --sun: #f2b13d;
+    --peach: #f0926a;
+    --berry: #c76a8a;
+    --lake: #6aa8c9;
+    --ink: #4a4238;
+    --ink-dim: #8a7f6e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--sky); color: var(--ink);
+    font-family: 'Quicksand', 'Segoe UI', sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  .hand { font-family: 'Caveat', cursive; }
+
+  .bg {
+    position: fixed; inset: 0; z-index: -2;
+    background: url('../../assets/generated/05-anderswelt-keyart.jpg') center 60%/cover no-repeat;
+    filter: brightness(1.02) saturate(1.05);
+  }
+  .bg::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(207,232,245,.15), rgba(253,248,236,.72) 88%); }
+
+  /* Pollen/Glühwürmchen */
+  .pollen { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  .pollen span {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    background: radial-gradient(circle, #fff8dc, rgba(242,177,61,.55));
+    animation: floatUp linear infinite; opacity: 0;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(10vh) translateX(0) scale(.7); opacity: 0; }
+    15% { opacity: .8; }
+    85% { opacity: .4; }
+    100% { transform: translateY(-105vh) translateX(4vw) scale(1.1); opacity: 0; }
+  }
+
+  .panel {
+    background: rgba(253,248,236,.88);
+    border: 2px solid rgba(124,176,105,.4);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 10px 28px -14px rgba(74,66,56,.35);
+    backdrop-filter: blur(4px);
+  }
+  .panel h2 {
+    font-size: 1rem; font-weight: 700; color: var(--leaf-dark);
+    letter-spacing: .06em; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .panel h2 .sub { font-family: 'Caveat', cursive; font-size: 1.05rem; color: var(--ink-dim); font-weight: 500; }
+
+  /* ── Intro ── */
+  .intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: linear-gradient(180deg, #bfe0f2 0%, #fdf3da 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1.6rem; padding: 2rem; text-align: center; transition: opacity 1s ease;
+  }
+  .intro.hidden { opacity: 0; pointer-events: none; }
+  .intro .companion {
+    width: 150px; height: 150px; border-radius: 50%;
+    background: url('../../assets/generated/05-anderswelt-vertrauter.jpg') center/cover;
+    border: 5px solid #fff; box-shadow: 0 14px 40px -12px rgba(74,66,56,.45);
+    animation: bob 3.4s ease-in-out infinite;
+  }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+  .intro h1 { font-size: clamp(2.4rem, 6vw, 4rem); color: var(--leaf-dark); font-weight: 700; letter-spacing: .05em; }
+  .intro h1 .hand { color: var(--peach); }
+  .intro .story { max-width: 620px; font-size: 1.22rem; line-height: 1.85; color: var(--ink); min-height: 6.5em; }
+  .intro .story em { color: var(--berry); font-style: normal; font-weight: 600; }
+  .btn {
+    font-family: 'Quicksand', sans-serif; font-size: 1.02rem; font-weight: 700;
+    background: linear-gradient(180deg, var(--sun), #e09c2b); color: #fff;
+    border: none; border-radius: 999px; padding: .85rem 2.6rem; cursor: pointer;
+    box-shadow: 0 6px 16px -6px rgba(224,156,43,.7); transition: all .2s;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -6px rgba(224,156,43,.8); }
+  .intro .skip { background: none; border: none; color: var(--ink-dim); cursor: pointer; font-size: .92rem; text-decoration: underline; font-family: 'Quicksand', sans-serif; }
+  .intro .skip:hover { color: var(--ink); }
+
+  /* ── Layout ── */
+  .game { display: none; grid-template-columns: 330px 1fr 330px; gap: 16px; padding: 16px; max-width: 1520px; margin: 0 auto; }
+  .game.active { display: grid; }
+  .col { display: flex; flex-direction: column; gap: 16px; }
+  .kapitel { grid-column: 1/-1; text-align: center; font-family: 'Caveat', cursive; font-size: 1.4rem; color: var(--leaf-dark); }
+
+  .topbar { grid-column: 1/-1; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 10px 16px; }
+  .mult-chip { font-size: 1.3rem; font-weight: 700; }
+  .mult-x { color: var(--ink-dim); }
+  .mult-total { font-size: 1.35rem; font-weight: 700; color: var(--leaf-dark); padding-left: 12px; border-left: 2px solid rgba(124,176,105,.35); }
+
+  /* ── Mitte ── */
+  .center { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .score-line { text-align: center; }
+  .score-line .label { font-family: 'Caveat', cursive; font-size: 1.25rem; color: var(--ink-dim); }
+  .score-line .score { font-size: 2.7rem; font-weight: 700; color: var(--peach); text-shadow: 0 2px 0 #fff; }
+  .score-line .rate { color: var(--lake); font-weight: 600; font-size: .98rem; }
+  .garden { position: relative; width: min(400px, 60vw); aspect-ratio: 1; }
+  .garden svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .garden .heart {
+    position: absolute; inset: 31%; border-radius: 50%;
+    background: url('../../assets/generated/05-anderswelt-vertrauter.jpg') center/cover;
+    border: 4px solid #fff; box-shadow: 0 10px 26px -10px rgba(74,66,56,.5);
+    animation: bob 4s ease-in-out infinite;
+  }
+  circle.track { fill: none; stroke: rgba(74,66,56,.08); }
+  circle.arc { fill: none; stroke-linecap: round; }
+
+  .fernziel { width: 100%; max-width: 540px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: .88rem; font-weight: 600; color: var(--ink-dim); margin-bottom: 5px; }
+  .bar-label b { color: var(--berry); }
+  .bar { height: 14px; background: rgba(74,66,56,.1); border-radius: 999px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--sun), var(--peach)); width: 0%; transition: width .4s; border-radius: 999px; }
+  .note { font-size: .86rem; color: var(--ink-dim); margin-top: 8px; min-height: 2.2em; }
+
+  /* ── Gilde (Einheiten) ── */
+  .unit {
+    border: 2px solid rgba(74,66,56,.12); background: #fff; border-radius: 14px;
+    padding: 11px; margin-bottom: 10px; display: grid; grid-template-columns: 48px 1fr; gap: 10px; align-items: center;
+    cursor: pointer; user-select: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .unit:hover:not(.locked) { border-color: var(--leaf); box-shadow: 0 6px 16px -8px rgba(74,66,56,.35); }
+  .unit:active:not(.locked) { box-shadow: 0 2px 8px -4px rgba(74,66,56,.35); }
+  .unit.locked { opacity: .45; }
+  .unit .face {
+    width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 1.5rem; background: color-mix(in srgb, currentColor 18%, white);
+    border: 2px solid currentColor; position: relative;
+  }
+  .unit .face::after {
+    content: ''; position: absolute; inset: -2px; border-radius: 50%;
+    background: conic-gradient(currentColor calc(var(--p) * 1turn), transparent 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+            mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px));
+  }
+  .unit .name { font-weight: 700; font-size: .98rem; }
+  .unit .stats { font-size: .8rem; color: var(--ink-dim); }
+  .unit .stats b { color: currentColor; }
+  .unit .cost {
+    grid-column: 1 / -1; border-top: 2px solid rgba(74,66,56,.1); padding-top: 7px;
+    font-size: .86rem; font-weight: 700; color: var(--leaf-dark);
+  }
+  .unit.dim .cost { opacity: .5; }
+  .unit.ready { border-color: var(--berry); }
+  .unit.ready .cost { color: var(--berry); }
+
+  /* ── Frühlingswende ── */
+  .reinc .preview { line-height: 1.8; font-size: .95rem; margin-bottom: 10px; }
+  .reinc .preview b { color: var(--berry); font-size: 1.02rem; }
+  .btn-reinc { width: 100%; padding: 11px; background: linear-gradient(180deg, var(--berry), #a94f70); box-shadow: 0 6px 16px -6px rgba(199,106,138,.7); }
+  .btn-reinc:hover { box-shadow: 0 10px 22px -6px rgba(199,106,138,.85); }
+  .btn-reinc.dim { opacity: .5; cursor: default; transform: none; box-shadow: none; }
+
+  /* ── Waldgeist (Boss, cozy) ── */
+  .spirit .sname { font-weight: 700; font-size: 1.08rem; }
+  .spirit .smood { font-family: 'Caveat', cursive; font-size: 1.1rem; color: var(--berry); margin-bottom: 8px; }
+  .hpbar { height: 16px; background: rgba(74,66,56,.1); border-radius: 999px; overflow: hidden; margin-bottom: 5px; }
+  .hpbar > div { height: 100%; width: 100%; background: linear-gradient(90deg, #b0759a, var(--berry)); transition: width .3s; border-radius: 999px; }
+  .spirit .hp-num { font-size: .82rem; color: var(--ink-dim); text-align: right; margin-bottom: 8px; }
+  .spirit .slog { font-size: .86rem; color: var(--ink-dim); min-height: 3.2em; line-height: 1.55; }
+
+  /* ── Vertrauter ── */
+  .buddy { display: flex; gap: 12px; align-items: center; }
+  .buddy img { width: 84px; height: 84px; border-radius: 16px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 6px 14px -6px rgba(74,66,56,.4); }
+  .buddy .btext { font-size: .86rem; color: var(--ink-dim); line-height: 1.5; }
+  .buddy .btext b { color: var(--leaf-dark); }
+
+  @media (max-width: 1100px) { .game { grid-template-columns: 1fr; } .garden { margin: 0 auto; } }
+
+  /* ── Mockup-Ende ── */
+  .endnote { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 2rem; background: rgba(74,66,56,.45); }
+  .endnote.show { display: flex; }
+  .endnote .box {
+    max-width: 600px; text-align: center; padding: 2.4rem;
+    background: var(--cream); border: 2px solid rgba(124,176,105,.5); border-radius: 22px;
+    box-shadow: 0 20px 50px -18px rgba(74,66,56,.6);
+  }
+  .endnote h2 { color: var(--leaf-dark); font-size: 1.4rem; margin-bottom: 1rem; }
+  .endnote p { color: var(--ink); font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.6rem; }
+  .endnote .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .endnote a.btn { text-decoration: none; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="pollen" id="pollen"></div>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<div class="intro" id="intro">
+  <div class="companion"></div>
+  <h1>Anderswelt<span class="hand"> — Kapitel Frühling</span></h1>
+  <div class="story" id="storyText"></div>
+  <button class="btn" id="storyNext">Weiter</button>
+  <button class="skip" id="storySkip">Intro überspringen</button>
+</div>
+
+<!-- ═══════════ SPIEL ═══════════ -->
+<div class="game" id="game">
+  <div class="kapitel">Kapitel 1 — Ein Gasthaus am Rand der Welt ✿</div>
+  <div class="topbar panel" id="topbar"></div>
+
+  <!-- Links -->
+  <div class="col">
+    <div class="panel">
+      <h2>Deine Gilde <span class="sub">alle packen mit an!</span></h2>
+      <div id="units"></div>
+    </div>
+    <div class="panel reinc">
+      <h2>Frühlingswende <span class="sub">alles auf Anfang, nur schöner</span></h2>
+      <div class="preview">
+        Segen der Jahreszeiten: <b id="pmultNow">×1</b> → <b id="pmultNext">×1</b><br>
+        Blüten-Exponent: <b id="pexpNow">^1.00</b> · Wenden: <b id="reincCount">0</b>
+      </div>
+      <button class="btn btn-reinc dim" id="reincBtn">Die Jahreszeit wenden</button>
+      <div class="note" id="reincNote">Ab 1 M Lichtblüten: Der Frühling beginnt von vorn — aber die Saat erinnert sich.</div>
+    </div>
+  </div>
+
+  <!-- Mitte -->
+  <div class="center">
+    <div class="score-line">
+      <div class="label">Lichtblüten</div>
+      <div class="score" id="score">0</div>
+      <div class="rate" id="rate">+0 / Runde</div>
+    </div>
+    <div class="garden">
+      <svg viewBox="0 0 100 100" id="rings"></svg>
+      <div class="heart"></div>
+    </div>
+    <div class="fernziel panel">
+      <div class="bar-label"><b>DER PFAD ZU DEN SCHWEBENDEN INSELN</b><span id="fzPct">0.00 %</span></div>
+      <div class="bar"><div id="fzBar"></div></div>
+      <div class="note" style="min-height:auto">Bei <b style="color:var(--berry)">1e12 Lichtblüten</b> öffnet Kapitel 2: <i>Über den Wolken</i>.</div>
+    </div>
+  </div>
+
+  <!-- Rechts -->
+  <div class="col">
+    <div class="panel spirit">
+      <h2>Verstimmter Waldgeist <span class="sub">bitte befrieden!</span></h2>
+      <div class="sname" id="bossName">Brummelwurz</div>
+      <div class="smood" id="bossMood">Laune: knurrig (schlecht geschlafen)</div>
+      <div class="hpbar"><div id="bossHp"></div></div>
+      <div class="hp-num" id="bossHpNum"></div>
+      <div class="slog" id="bossLog">Jede Gilden-Runde bringt ihm Tee, Kekse und gute Worte. Befriede ihn, und er schickt dir Verstärkung.</div>
+    </div>
+    <div class="panel">
+      <h2>Dein Vertrauter <span class="sub">Mochi</span></h2>
+      <div class="buddy">
+        <img src="../../assets/generated/05-anderswelt-vertrauter.jpg" alt="Mochi, der Waldgeist-Vertraute">
+        <div class="btext"><b>Mochi</b> sammelt heimlich Lichtblüten, wenn du offline bist.
+        In der Vollversion: <b>81 Vertraute</b> mit Passiv-Boni (= Revo-Zoo), Fütterung &amp; Freundschaftslevel.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="endnote" id="endnote">
+  <div class="box">
+    <h2>✿ Mockup geschafft — Mochi klatscht!</h2>
+    <p>Der Pfad zu den schwebenden Inseln liegt frei — aber Kapitel 2 («Über den Wolken»)
+    gibt es erst im echten Spiel.<br>
+    Bleib noch auf einen Tee oder wechsle zum nächsten Test.</p>
+    <div class="row">
+      <button class="btn" onclick="this.closest('.endnote').classList.remove('show')">Weiterspielen</button>
+      <a class="btn" href="../index.html">Zur Übersicht ✓</a>
+    </div>
+  </div>
+</div>
+
+<script src="../lib/break_eternity.min.js"></script>
+<script>
+'use strict';
+/* ═══════════ Story ═══════════ */
+const STORY = [
+  'Du bist beim Gießen deiner Balkon-Tomaten eingeschlafen.<br>Aufgewacht bist du auf einer Blumenwiese — mit einem <em>flauschigen Etwas</em> auf dem Bauch.',
+  'Das Etwas heißt <em>Mochi</em> und behauptet, du seist jetzt Gildenmeister.<br>Die Gilde: ein windschiefes Gasthaus. Das Personal: genau null Personen.',
+  'Aber die Wiese leuchtet, der Tee ist warm, und irgendwo hinter den Wolken<br>schweben <em>Inseln</em>. Na gut. Eine Runde bleiben. Vielleicht zwei.'
+];
+let storyIdx = 0;
+const storyText = document.getElementById('storyText');
+const showStory = () => {
+  storyText.innerHTML = STORY[storyIdx];
+  document.getElementById('storyNext').textContent = storyIdx < STORY.length - 1 ? 'Weiter' : 'Die Gilde eröffnen ✿';
+};
+const startGame = () => {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game').classList.add('active');
+};
+document.getElementById('storyNext').addEventListener('pointerdown', () => {
+  if (storyIdx < STORY.length - 1) { storyIdx++; showStory(); } else startGame();
+});
+document.getElementById('storySkip').addEventListener('pointerdown', startGame);
+showStory();
+
+/* ═══════════ Format ═══════════ */
+const SUF = ['', ' K', ' M', ' B', ' T', ' Qa', ' Qi', ' Sx', ' Sp', ' Oc', ' No', ' Dc'];
+function fmt(x) {
+  const d = x instanceof Decimal ? x : new Decimal(x);
+  if (d.lt(1000)) {
+    const n = d.toNumber();
+    return n < 10 && n % 1 !== 0 ? n.toFixed(1) : Math.floor(n).toString();
+  }
+  const e = d.log10().toNumber();
+  const tier = Math.floor(e / 3);
+  if (tier < SUF.length) {
+    const v = d.div(Decimal.pow(10, tier * 3)).toNumber();
+    return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + SUF[tier];
+  }
+  if (e < 1e6) return d.toExponential(2).replace('+', '');
+  return d.toString();
+}
+
+/* ═══════════ Gilde (= Revo-Kreise) ═══════════ */
+const UNITS = [
+  { name: 'Pilzsammlerin Fine', face: '🍄', color: '#c76a8a', baseLap: 2.0, baseCost: 14,   unlocked: true  },
+  { name: 'Bäcker Tammo',       face: '🥐', color: '#f2b13d', baseLap: 3.5, baseCost: 370,  unlocked: false },
+  { name: 'Kräuterhexe Juni',   face: '🌿', color: '#7cb069', baseLap: 5.6, baseCost: 27e3, unlocked: false },
+  { name: 'Ritterin a. D. Olga',face: '🛡️', color: '#6aa8c9', baseLap: 9.0, baseCost: 3.3e6,unlocked: false }
+];
+UNITS.forEach(u => Object.assign(u, { level: 1, cap: 20, asc: 0, progress: 0, growth: 1.18, cost: new Decimal(u.baseCost) }));
+// Fleiß steigt AUSSCHLIESSLICH durch Spieler-Käufe — Design-Entscheidung #1
+const unitMult = u => (1 + 0.3 * (u.level - 1)) * Math.pow(2.6, u.asc);
+
+const S = { score: new Decimal(0), pMult: new Decimal(1), pExp: 1, reincs: 0, reincClicks: 0, bossTier: 0, bossHp: 50, bossMax: 50, bossDead: false, globalMult: 1 };
+const BOSSES = [
+  { n: 'Brummelwurz', m: 'Laune: knurrig (schlecht geschlafen)' },
+  { n: 'Nebelmuhme', m: 'Laune: melancholisch (vermisst den Herbst)' },
+  { n: 'Der alte Wurzelkönig', m: 'Laune: majestätisch beleidigt' }
+];
+
+const lapTime = u => u.baseLap / (1 + 0.1 * (u.level - 1)) / (1 + S.reincs * 0.15);
+const product = () => UNITS.reduce((a, u) => a.mul(u.unlocked ? unitMult(u) : 1), new Decimal(1));
+const gainPerLap = () => product().mul(S.pMult).pow(S.pExp).mul(S.globalMult);
+const reincGain = () => S.score.gte(1e6) ? Decimal.max(S.pMult, S.score.div(1e6).sqrt().mul(6).floor()) : S.pMult;
+
+/* ═══════════ DOM ═══════════ */
+const unitsEl = document.getElementById('units');
+UNITS.forEach((u, i) => {
+  const d = document.createElement('div');
+  d.className = 'unit locked'; d.style.color = u.color; d.id = 'unit' + i;
+  d.dataset.idx = i;
+  d.innerHTML = `
+    <div class="face" style="--p:0">${u.face}</div>
+    <div><div class="name">${u.name}</div><div class="stats"></div></div>
+    <div class="cost">—</div>`;
+  unitsEl.appendChild(d);
+});
+const ringsSvg = document.getElementById('rings');
+UNITS.forEach((u, i) => {
+  const r = 47 - i * 5;
+  ringsSvg.innerHTML += `<circle class="track" cx="50" cy="50" r="${r}" stroke-width="3"/>
+    <circle class="arc" cx="50" cy="50" r="${r}" stroke-width="3" stroke="${u.color}"
+      stroke-dasharray="${2 * Math.PI * r}" stroke-dashoffset="${2 * Math.PI * r}" id="arc${i}"/>`;
+});
+unitsEl.addEventListener('pointerdown', e => {
+  const card = e.target.closest('.unit'); if (!card) return;
+  const i = +card.dataset.idx, u = UNITS[i];
+  if (!u.unlocked) return;
+  if (u.level >= u.cap) { u.asc++; u.cap += 10; u.growth += 0.05; }
+  else if (S.score.gte(u.cost)) { S.score = S.score.sub(u.cost); u.level++; u.cost = u.cost.mul(u.growth); }
+});
+
+/* ═══════════ Frühlingswende (= Prestige) ═══════════ */
+const reincBtn = document.getElementById('reincBtn');
+reincBtn.addEventListener('pointerdown', () => {
+  if (S.score.lt(1e6)) return;
+  S.reincClicks++;
+  if (S.reincClicks < 5) {
+    document.getElementById('reincNote').innerHTML = `Mochi schaut dich prüfend an: <b style="color:var(--berry)">noch ${5 - S.reincClicks}× bestätigen.</b>`;
+    return;
+  }
+  const g = reincGain();
+  S.reincs++; S.pMult = g; S.pExp = 1 + S.reincs * 0.05; S.score = new Decimal(0); S.reincClicks = 0;
+  UNITS.forEach(u => { u.level = 1; u.progress = 0; u.asc = 0; u.cap = 20; u.growth = 1.18; u.cost = new Decimal(u.baseCost); });
+  // Waldgeister resetten pro Jahreszeit (inkl. ihrer Segens-Multiplikatoren)
+  S.bossTier = 0; S.bossMax = 50; S.bossHp = 50; S.bossDead = false; S.globalMult = 1;
+  document.getElementById('bossName').textContent = BOSSES[0].n;
+  document.getElementById('bossMood').textContent = BOSSES[0].m;
+  document.getElementById('bossLog').innerHTML = 'Neuer Frühling — und die Waldgeister sind prompt wieder verstimmt.';
+  document.getElementById('reincNote').textContent = 'Neuer Frühling. Dieselbe Wiese. Mehr Blüten als je zuvor.';
+});
+
+/* ═══════════ Waldgeist (= Boss, gewaltfrei) ═══════════ */
+function hitBoss(dmg) {
+  if (S.bossDead) return;
+  S.bossHp -= dmg;
+  if (S.bossHp <= 0) {
+    S.bossTier++;
+    const rm = 3 * S.bossTier;
+    S.globalMult *= rm;
+    if (S.bossTier <= 3 && !UNITS[S.bossTier].unlocked) UNITS[S.bossTier].unlocked = true;
+    if (S.bossTier < BOSSES.length) {
+      S.bossMax = 50 * Math.pow(30, S.bossTier); S.bossHp = S.bossMax;
+      document.getElementById('bossName').textContent = BOSSES[S.bossTier].n;
+      document.getElementById('bossMood').textContent = BOSSES[S.bossTier].m;
+      document.getElementById('bossLog').innerHTML = `Befriedet! Er schickt dir Verstärkung und segnet die Gilde (<b>×${rm}</b> auf alles). Der nächste Geist wartet schon …`;
+    } else {
+      S.bossDead = true;
+      document.getElementById('bossName').textContent = '— Der Wald schnurrt zufrieden —';
+      document.getElementById('bossMood').textContent = 'Laune: bestens';
+      document.getElementById('bossLog').innerHTML = `Alle Waldgeister sind versöhnt. Über den Wolken glitzern die <b>schwebenden Inseln</b>.`;
+    }
+  }
+}
+
+/* ═══════════ Loop + Render ═══════════ */
+const $ = id => document.getElementById(id);
+let last = performance.now();
+function tick() {
+  const now = performance.now();
+  const dt = Math.min((now - last) / 1000, 2); last = now;
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    u.progress += dt / lapTime(u);
+    const laps = Math.floor(u.progress);
+    if (laps > 0) {
+      u.progress -= laps;
+      S.score = S.score.add(gainPerLap().mul(laps));
+      hitBoss(laps * Math.min(product().toNumber(), 1e6) * 0.5 * (1 + i));
+    }
+  });
+  render();
+}
+function render() {
+  $('score').textContent = fmt(S.score) + ' ✿';
+  $('rate').textContent = `+${fmt(gainPerLap())} / Runde`;
+
+  let chain = '';
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    chain += `${i > 0 ? '<span class="mult-x">×</span>' : ''}<span class="mult-chip" style="color:${u.color}">${fmt(unitMult(u))}</span>`;
+  });
+  chain += `<span class="mult-total">= ×${fmt(product())}</span>`;
+  if (S.pMult.gt(1)) chain += `<span class="mult-x">· Segen ×${fmt(S.pMult)} ^${S.pExp.toFixed(2)}</span>`;
+  $('topbar').innerHTML = chain;
+
+  UNITS.forEach((u, i) => {
+    const el = $('unit' + i);
+    el.classList.toggle('locked', !u.unlocked);
+    el.querySelector('.face').style.setProperty('--p', u.progress.toFixed(3));
+    el.querySelector('.stats').innerHTML = u.unlocked
+      ? `Lv ${u.level}/${u.cap} · Fleiß <b>×${fmt(unitMult(u))}</b> · ${(1 / lapTime(u)).toFixed(2)} R/s`
+      : `<i>Kommt nach Waldgeist ${i} dazu</i>`;
+    const costEl = el.querySelector('.cost');
+    if (!u.unlocked) { costEl.textContent = '—'; el.classList.remove('ready'); el.classList.remove('dim'); }
+    else if (u.level >= u.cap) { costEl.textContent = 'Aufblühen bereit — Karte antippen ✿'; el.classList.add('ready'); el.classList.remove('dim'); }
+    else { costEl.textContent = `Anfeuern: ${fmt(u.cost)} ✿`; el.classList.remove('ready'); el.classList.toggle('dim', S.score.lt(u.cost)); }
+    const c = 2 * Math.PI * (47 - i * 5);
+    $('arc' + i).style.strokeDashoffset = u.unlocked ? c * (1 - u.progress) : c;
+  });
+
+  $('pmultNow').textContent = '×' + fmt(S.pMult);
+  $('pmultNext').textContent = '×' + fmt(reincGain());
+  $('pexpNow').textContent = '^' + S.pExp.toFixed(2);
+  $('reincCount').textContent = S.reincs;
+  reincBtn.classList.toggle('dim', S.score.lt(1e6));
+  reincBtn.textContent = S.reincClicks > 0 ? `Bestätigen … (${S.reincClicks}/5)` : 'Die Jahreszeit wenden';
+
+  if (!S.bossDead) {
+    $('bossHp').style.width = Math.max(0, S.bossHp / S.bossMax * 100) + '%';
+    $('bossHpNum').textContent = `Noch ${fmt(Math.max(0, S.bossHp))} von ${fmt(S.bossMax)} Miesepetrigkeit`;
+  } else { $('bossHp').style.width = '0%'; $('bossHpNum').textContent = '—'; }
+
+  const pct = Math.min(100, Math.max(0, S.score.max(1).log10().toNumber() / 12 * 100));
+  $('fzBar').style.width = pct + '%';
+  $('fzPct').textContent = pct.toFixed(2) + ' %';
+  if (!S.endShown && S.score.gte(1e12)) { S.endShown = true; $('endnote').classList.add('show'); }
+}
+
+/* ═══════════ Pollen ═══════════ */
+const pollenEl = document.getElementById('pollen');
+for (let i = 0; i < 22; i++) {
+  const s = document.createElement('span');
+  s.style.left = Math.random() * 100 + 'vw';
+  s.style.top = (55 + Math.random() * 55) + 'vh';
+  s.style.animationDuration = (10 + Math.random() * 16) + 's';
+  s.style.animationDelay = (Math.random() * 14) + 's';
+  pollenEl.appendChild(s);
+}
+last = performance.now();
+setInterval(tick, 100);
+</script>
+</body>
+</html>

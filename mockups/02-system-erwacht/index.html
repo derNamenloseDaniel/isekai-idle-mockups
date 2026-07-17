@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[System] Erwacht — Mockup 2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,600;1,400&display=swap');
+
+  :root {
+    --cyan: #35e0ff;
+    --cyan-dim: #1a7d94;
+    --violet: #8f6fff;
+    --navy: #060b18;
+    --navy-2: #0b1428;
+    --glass: rgba(20, 40, 75, .38);
+    --glass-border: rgba(53, 224, 255, .28);
+    --text: #d7e9f5;
+    --text-dim: #6d87a0;
+    --hp: #ff4d6d;
+    --xp: #ffd166;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--navy); color: var(--text);
+    font-family: 'Exo 2', 'Segoe UI', sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  .rajdhani, h1, h2, h3, button { font-family: 'Rajdhani', 'Segoe UI', sans-serif; }
+
+  .bg {
+    position: fixed; inset: 0; z-index: -3;
+    background: url('../../assets/generated/02-system-keyart.jpg') center 30%/cover no-repeat;
+    filter: brightness(.5) saturate(1.15);
+  }
+  .bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,11,24,.55), rgba(6,11,24,.92) 80%); }
+  /* Scanlines */
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 50; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(53,224,255,.016) 2px 4px);
+  }
+
+  /* ── Glas-Panels ── */
+  .panel {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    backdrop-filter: blur(9px);
+    -webkit-backdrop-filter: blur(9px);
+    padding: 16px;
+    box-shadow: 0 0 0 1px rgba(53,224,255,.05) inset, 0 8px 32px -12px rgba(0,0,0,.8);
+    position: relative;
+  }
+  .panel::before {
+    content: ''; position: absolute; top: 0; left: 12px; right: 12px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(53,224,255,.7), transparent);
+  }
+  .panel h2 {
+    color: var(--cyan); font-size: 1rem; letter-spacing: .3em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline;
+  }
+  .panel h2 .sub { color: var(--text-dim); font-size: .72rem; letter-spacing: .08em; font-family: 'Exo 2', sans-serif; text-transform: none; }
+
+  /* ── Intro ── */
+  .intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: radial-gradient(ellipse at center, #0a1730 0%, #030610 80%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1.8rem; padding: 2rem; text-align: center; transition: opacity 1s ease;
+  }
+  .intro.hidden { opacity: 0; pointer-events: none; }
+  .sys-window {
+    max-width: 640px; width: 100%;
+    background: rgba(10, 25, 55, .75); border: 1px solid var(--cyan);
+    border-radius: 6px; padding: 2rem;
+    box-shadow: 0 0 40px rgba(53,224,255,.25), inset 0 0 24px rgba(53,224,255,.06);
+    animation: sysFlicker 4s infinite;
+  }
+  @keyframes sysFlicker { 0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:.86} 94%{opacity:1} 97%{opacity:.93} 98%{opacity:1} }
+  .sys-window .sys-head {
+    color: var(--cyan); letter-spacing: .4em; font-weight: 700; font-size: .95rem;
+    border-bottom: 1px solid rgba(53,224,255,.3); padding-bottom: .8rem; margin-bottom: 1.2rem;
+  }
+  .sys-window .story { font-size: 1.18rem; line-height: 1.95; min-height: 8em; }
+  .sys-window .story em { color: var(--cyan); font-style: normal; font-weight: 600; }
+  .btn {
+    background: linear-gradient(180deg, rgba(53,224,255,.18), rgba(53,224,255,.06));
+    border: 1px solid var(--cyan); color: var(--cyan);
+    font-size: 1rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+    padding: .8rem 2.4rem; border-radius: 4px; cursor: pointer; transition: all .2s;
+  }
+  .btn:hover { background: rgba(53,224,255,.28); box-shadow: 0 0 24px rgba(53,224,255,.4); color: #fff; }
+  .intro .skip { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: .9rem; text-decoration: underline; font-family: 'Exo 2', sans-serif; letter-spacing: 0; text-transform: none; }
+  .intro .skip:hover { color: var(--text); }
+
+  /* ── Layout ── */
+  .game { display: none; grid-template-columns: 320px 1fr 330px; gap: 16px; padding: 16px; max-width: 1540px; margin: 0 auto; }
+  .game.active { display: grid; }
+  .col { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── Statusfenster ── */
+  .status .portrait {
+    width: 100%; aspect-ratio: 4/3.4; border-radius: 8px; margin-bottom: 12px;
+    background: url('../../assets/generated/02-system-portrait.jpg') center 12%/cover;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 0 30px -6px rgba(53,224,255,.4) inset, 0 4px 20px rgba(0,0,0,.5);
+  }
+  .status .srow { display: flex; justify-content: space-between; font-size: .95rem; padding: 4px 0; border-bottom: 1px dashed rgba(109,135,160,.2); }
+  .status .srow b { color: var(--cyan); font-family: 'Rajdhani', sans-serif; }
+  .status .srow .rank { color: var(--xp); font-weight: 700; letter-spacing: .1em; }
+
+  /* ── Topbar ── */
+  .topbar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 10px 16px; }
+  .mult-chip { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; text-shadow: 0 0 12px currentColor; }
+  .mult-x { color: var(--text-dim); }
+  .mult-total { color: var(--cyan); font-size: 1.35rem; padding-left: 12px; border-left: 1px solid rgba(53,224,255,.3); }
+
+  /* ── Mana-Zirkel Mitte ── */
+  .center { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .mana-display { text-align: center; }
+  .mana-display .label { color: var(--text-dim); letter-spacing: .45em; font-size: .75rem; text-transform: uppercase; }
+  .mana-display .score { font-family: 'Rajdhani', sans-serif; font-size: 2.8rem; font-weight: 700; color: var(--cyan); text-shadow: 0 0 28px rgba(53,224,255,.6); }
+  .mana-display .rate { color: var(--violet); font-size: 1rem; }
+  .circle-stage { position: relative; width: min(400px, 60vw); aspect-ratio: 1; }
+  .circle-stage svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .circle-stage .core {
+    position: absolute; inset: 33%; border-radius: 50%;
+    background: radial-gradient(circle, rgba(53,224,255,.35), rgba(53,224,255,.04) 70%);
+    display: grid; place-items: center;
+    animation: corePulse 3.2s ease-in-out infinite;
+  }
+  @keyframes corePulse { 0%,100% { box-shadow: 0 0 30px 2px rgba(53,224,255,.3);} 50% { box-shadow: 0 0 60px 10px rgba(53,224,255,.5);} }
+  .circle-stage .core span { font-family: 'Rajdhani', sans-serif; font-size: 2rem; font-weight: 700; color: #fff; text-shadow: 0 0 18px var(--cyan); }
+  circle.track { fill: none; stroke: rgba(215,233,245,.07); }
+  circle.arc { fill: none; stroke-linecap: round; filter: drop-shadow(0 0 4px currentColor); }
+
+  .fernziel { width: 100%; max-width: 540px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: .85rem; color: var(--text-dim); margin-bottom: 5px; letter-spacing: .12em; }
+  .bar-label b { color: var(--cyan); }
+  .bar { height: 12px; background: rgba(3,6,16,.8); border: 1px solid var(--glass-border); border-radius: 6px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, var(--cyan-dim), var(--cyan)); width: 0%; transition: width .4s; box-shadow: 0 0 14px rgba(53,224,255,.8); }
+
+  /* ── Skills (Einheiten) ── */
+  .skill {
+    border: 1px solid rgba(109,135,160,.25); background: rgba(6,11,24,.45); border-radius: 8px;
+    padding: 11px; margin-bottom: 10px; display: grid; grid-template-columns: 46px 1fr; gap: 10px; align-items: center;
+    cursor: pointer; user-select: none; transition: border-color .15s, background .15s;
+  }
+  .skill:hover:not(.locked) { border-color: var(--cyan); background: rgba(10,20,40,.6); }
+  .skill:active:not(.locked) { background: rgba(14,28,55,.7); }
+  .skill.locked { opacity: .4; }
+  .skill .icon {
+    width: 46px; height: 46px; border-radius: 8px; border: 1px solid currentColor;
+    display: grid; place-items: center; font-size: 1.5rem; position: relative;
+    background: rgba(3,6,16,.6); overflow: hidden;
+  }
+  .skill .icon::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--p) * 100%);
+    background: currentColor; opacity: .28;
+  }
+  .skill .name { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 1.02rem; }
+  .skill .stats { font-size: .82rem; color: var(--text-dim); }
+  .skill .stats b { color: currentColor; }
+  .skill .cost {
+    grid-column: 1 / -1; border-top: 1px solid rgba(109,135,160,.2); padding-top: 7px;
+    font-size: .88rem; font-weight: 600; color: var(--cyan);
+  }
+  .skill.dim .cost { opacity: .45; }
+  .skill.ready { border-color: var(--violet); }
+  .skill.ready .cost { color: var(--violet); }
+
+  /* ── Reinkarnation / Gate ── */
+  .reinc .preview { line-height: 1.85; font-size: .95rem; margin-bottom: 10px; }
+  .reinc .preview b { color: var(--violet); font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; }
+  .btn-reinc { width: 100%; padding: 11px; border-color: var(--violet); color: var(--violet); background: linear-gradient(180deg, rgba(143,111,255,.16), rgba(143,111,255,.04)); }
+  .btn-reinc:hover { background: rgba(143,111,255,.28); box-shadow: 0 0 24px rgba(143,111,255,.4); }
+  .btn-reinc.dim { opacity: .4; cursor: default; box-shadow: none; }
+  .note { color: var(--text-dim); font-size: .82rem; margin-top: 8px; min-height: 2.2em; font-style: italic; }
+
+  /* ── Gate/Boss ── */
+  .gate .gname { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 1.1rem; }
+  .gate .gclass { color: var(--hp); font-size: .78rem; letter-spacing: .28em; text-transform: uppercase; margin-bottom: 10px; }
+  .hpbar { height: 16px; background: rgba(3,6,16,.8); border: 1px solid rgba(255,77,109,.4); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+  .hpbar > div { height: 100%; width: 100%; background: linear-gradient(90deg, #8c1f36, var(--hp)); transition: width .3s; box-shadow: 0 0 10px rgba(255,77,109,.6); }
+  .gate .hp-num { font-size: .82rem; color: var(--text-dim); text-align: right; margin-bottom: 8px; }
+  .gate .glog { font-size: .84rem; color: var(--text-dim); font-style: italic; min-height: 3.2em; line-height: 1.5; }
+  .gate.cleared .hpbar > div { background: #24445c; }
+
+  /* ── System-Toasts ── */
+  .toasts { position: fixed; top: 18px; right: 18px; z-index: 90; display: flex; flex-direction: column; gap: 10px; max-width: 360px; }
+  .toast {
+    background: rgba(10, 25, 55, .92); border: 1px solid var(--cyan); border-radius: 6px;
+    padding: 12px 16px; font-size: .92rem; line-height: 1.5;
+    box-shadow: 0 0 24px rgba(53,224,255,.3);
+    animation: toastIn .3s ease, toastOut .5s ease 5.5s forwards;
+  }
+  .toast b { color: var(--cyan); }
+  .toast .thead { color: var(--cyan); font-weight: 700; letter-spacing: .3em; font-size: .72rem; margin-bottom: 4px; font-family: 'Rajdhani', sans-serif; }
+  @keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes toastOut { to { transform: translateX(120%); opacity: 0; } }
+
+  .kapitel { grid-column: 1/-1; text-align: center; letter-spacing: .5em; text-transform: uppercase; font-size: .75rem; color: var(--text-dim); }
+  .kapitel b { color: var(--cyan); }
+  @media (max-width: 1100px) { .game { grid-template-columns: 1fr; } .circle-stage { margin: 0 auto; } }
+
+  /* ── Mockup-Ende ── */
+  .endnote { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; padding: 2rem; background: rgba(3,6,16,.85); }
+  .endnote.show { display: flex; }
+  .endnote .box {
+    max-width: 600px; text-align: center; padding: 2.4rem;
+    background: rgba(10,25,55,.96); border: 1px solid var(--cyan); border-radius: 8px;
+    box-shadow: 0 0 60px rgba(53,224,255,.3);
+  }
+  .endnote h2 { color: var(--cyan); font-size: 1.3rem; letter-spacing: .3em; margin-bottom: 1rem; }
+  .endnote p { color: var(--text); font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.6rem; }
+  .endnote .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .endnote a.btn { text-decoration: none; display: inline-block; }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="toasts" id="toasts"></div>
+
+<!-- ═══════════ INTRO ═══════════ -->
+<div class="intro" id="intro">
+  <div class="sys-window">
+    <div class="sys-head">［ SYSTEM ONLINE ］</div>
+    <div class="story" id="storyText"></div>
+  </div>
+  <button class="btn" id="storyNext">Bestätigen</button>
+  <button class="skip" id="storySkip">Intro überspringen</button>
+</div>
+
+<!-- ═══════════ SPIEL ═══════════ -->
+<div class="game" id="game">
+  <div class="kapitel">Kapitel 1 — <b>Der unterste Spieler</b></div>
+  <div class="topbar panel" id="topbar"></div>
+
+  <!-- Links: Statusfenster -->
+  <div class="col">
+    <div class="panel status">
+      <h2>Status <span class="sub">Spieler-Fenster</span></h2>
+      <div class="portrait"></div>
+      <div class="srow"><span>Name</span><b>Kael (du)</b></div>
+      <div class="srow"><span>Klasse</span><b>Namenlos</b></div>
+      <div class="srow"><span>Jäger-Rang</span><span class="rank" id="rank">F</span></div>
+      <div class="srow"><span>Wiedergeburten</span><b id="reincCount">0</b></div>
+      <div class="srow"><span>Titel</span><b id="title">Der Überfahrene</b></div>
+    </div>
+    <div class="panel reinc">
+      <h2>Rückkehr <span class="sub">Seelen-Protokoll</span></h2>
+      <div class="preview">
+        System-Bonus: <b id="pmultNow">×1</b> → <b id="pmultNext">×1</b><br>
+        Mana-Exponent: <b id="pexpNow">^1.00</b>
+      </div>
+      <button class="btn btn-reinc dim" id="reincBtn">［ Protokoll ausführen ］</button>
+      <div class="note" id="reincNote">Ab 1 M Mana: Kehre zu Tag 0 zurück — das System erinnert sich.</div>
+    </div>
+  </div>
+
+  <!-- Mitte -->
+  <div class="center">
+    <div class="mana-display">
+      <div class="label">Mana</div>
+      <div class="score" id="score">0</div>
+      <div class="rate" id="rate">+0 / Zirkelschluss</div>
+    </div>
+    <div class="circle-stage">
+      <svg viewBox="0 0 100 100" id="rings"></svg>
+      <div class="core"><span id="coreProduct">×1</span></div>
+    </div>
+    <div class="fernziel panel">
+      <div class="bar-label"><b>SYNCHRONISATION: WELTEN-GATE</b><span id="fzPct">0.00 %</span></div>
+      <div class="bar"><div id="fzBar"></div></div>
+      <div class="note" style="min-height:auto">Bei <b style="color:var(--cyan)">1e12 Mana</b> öffnet das System Kapitel 2: <i>«Jenseits des Gates»</i>.</div>
+    </div>
+  </div>
+
+  <!-- Rechts -->
+  <div class="col">
+    <div class="panel">
+      <h2>Skills <span class="sub">Mana-Zirkel</span></h2>
+      <div id="units"></div>
+    </div>
+    <div class="panel gate" id="gatePanel">
+      <h2>Gate <span class="sub">Dungeon-Break</span></h2>
+      <div class="gname" id="bossName">Steinfaust-Golem</div>
+      <div class="gclass" id="bossClass">E-Rang-Gate</div>
+      <div class="hpbar"><div id="bossHp"></div></div>
+      <div class="hp-num" id="bossHpNum"></div>
+      <div class="glog" id="bossLog">Deine Zirkel feuern automatisch auf das Gate. Räume es, um neue Skills zu entsiegeln.</div>
+    </div>
+  </div>
+</div>
+
+<div class="endnote" id="endnote">
+  <div class="box">
+    <h2>［ SYSTEM ］ MOCKUP ABGESCHLOSSEN</h2>
+    <p>Synchronisation mit dem Welten-Gate: <b style="color:var(--cyan)">100 %</b>.<br>
+    Mehr Inhalt existiert in diesem Mockup nicht — Kapitel 2 («Jenseits des Gates»)
+    entsteht erst im echten Spiel. Du kannst weiterspielen oder zum nächsten Test wechseln.</p>
+    <div class="row">
+      <button class="btn" onclick="this.closest('.endnote').classList.remove('show')">Weiterspielen</button>
+      <a class="btn" href="../03-hexenpfad/index.html">Nächstes Mockup →</a>
+      <a class="btn" href="../index.html">Zur Übersicht</a>
+    </div>
+  </div>
+</div>
+
+<script src="../lib/break_eternity.min.js"></script>
+<script>
+'use strict';
+/* ═══════════ Story ═══════════ */
+const STORY = [
+  'Protokoll 7A-Ω: Subjekt <em>»Kael«</em> verstorben.<br>Ursache: Lieferwagen. Ort: Zebrastreifen. Ironie: maximal.',
+  'Übertrage Bewusstsein in Zielwelt <em>Aethermoor</em> …<br>Klasse: unbestimmt. Talent: <em>[Fehler: nicht gefunden]</em>.',
+  'Ausgleichs-Paket gewährt: <em>[Skill: Ewige Wiederkehr]</em>.<br>Hinweis des Systems: <em>»Du wirst oft sterben. Das ist Teil des Plans.«</em>'
+];
+let storyIdx = 0;
+const storyText = document.getElementById('storyText');
+const showStory = () => {
+  storyText.innerHTML = STORY[storyIdx];
+  document.getElementById('storyNext').textContent = storyIdx < STORY.length - 1 ? 'Bestätigen' : '［ Erwachen ］';
+};
+const startGame = () => {
+  document.getElementById('intro').classList.add('hidden');
+  document.getElementById('game').classList.add('active');
+  toast('Willkommen in Aethermoor', 'Skill <b>[Zirkel des Anfängers]</b> aktiviert. Mana-Generierung: online.');
+};
+document.getElementById('storyNext').addEventListener('pointerdown', () => {
+  if (storyIdx < STORY.length - 1) { storyIdx++; showStory(); } else startGame();
+});
+document.getElementById('storySkip').addEventListener('pointerdown', startGame);
+showStory();
+
+/* ═══════════ Format ═══════════ */
+const SUF = ['', ' K', ' M', ' B', ' T', ' Qa', ' Qi', ' Sx', ' Sp', ' Oc', ' No', ' Dc'];
+function fmt(x) {
+  const d = x instanceof Decimal ? x : new Decimal(x);
+  if (d.lt(1000)) {
+    const n = d.toNumber();
+    return n < 10 && n % 1 !== 0 ? n.toFixed(1) : Math.floor(n).toString();
+  }
+  const e = d.log10().toNumber();
+  const tier = Math.floor(e / 3);
+  if (tier < SUF.length) {
+    const v = d.div(Decimal.pow(10, tier * 3)).toNumber();
+    return (v >= 100 ? v.toFixed(0) : v.toFixed(1)) + SUF[tier];
+  }
+  if (e < 1e6) return d.toExponential(2).replace('+', '');
+  return d.toString();
+}
+
+/* ═══════════ Skills (= Revo-Kreise) ═══════════ */
+const UNITS = [
+  { name: '[Zirkel des Anfängers]', icon: '✦', color: '#35e0ff', baseLap: 1.8, baseCost: 12,   unlocked: true  },
+  { name: '[Klingensturm]',         icon: '⚔', color: '#8f6fff', baseLap: 3.2, baseCost: 350,  unlocked: false },
+  { name: '[Schattenschritt]',      icon: '👁', color: '#ff4d6d', baseLap: 5.2, baseCost: 25e3, unlocked: false },
+  { name: '[Herrscher-Domäne]',     icon: '♛', color: '#ffd166', baseLap: 8.5, baseCost: 3e6,  unlocked: false }
+];
+UNITS.forEach(u => Object.assign(u, { level: 1, cap: 20, asc: 0, progress: 0, growth: 1.18, cost: new Decimal(u.baseCost) }));
+// Macht steigt AUSSCHLIESSLICH durch Spieler-Käufe — Design-Entscheidung #1
+const unitMult = u => (1 + 0.3 * (u.level - 1)) * Math.pow(2.6, u.asc);
+
+const S = { score: new Decimal(0), pMult: new Decimal(1), pExp: 1, reincs: 0, reincClicks: 0, bossTier: 0, bossHp: 50, bossMax: 50, bossDead: false, globalMult: 1 };
+const BOSSES = [
+  { n: 'Steinfaust-Golem', c: 'E-Rang-Gate' },
+  { n: 'Königin der Frostspinnen', c: 'C-Rang-Gate' },
+  { n: 'Erzdämon Vharkul', c: 'S-Rang-Gate · Roter Alarm' }
+];
+const RANKS = ['F', 'E', 'D', 'C', 'B', 'A', 'S', 'SS', 'SSS'];
+const TITLES = ['Der Überfahrene', 'Gate-Novize', 'Zirkel-Läufer', 'Dämonentöter', 'Herr der Wiederkehr'];
+
+const lapTime = u => u.baseLap / (1 + 0.1 * (u.level - 1)) / (1 + S.reincs * 0.15);
+const product = () => UNITS.reduce((a, u) => a.mul(u.unlocked ? unitMult(u) : 1), new Decimal(1));
+const gainPerLap = () => product().mul(S.pMult).pow(S.pExp).mul(S.globalMult);
+const reincGain = () => S.score.gte(1e6) ? Decimal.max(S.pMult, S.score.div(1e6).sqrt().mul(6).floor()) : S.pMult;
+
+/* ═══════════ DOM ═══════════ */
+const unitsEl = document.getElementById('units');
+UNITS.forEach((u, i) => {
+  const d = document.createElement('div');
+  d.className = 'skill locked'; d.style.color = u.color; d.id = 'unit' + i;
+  d.dataset.idx = i;
+  d.innerHTML = `
+    <div class="icon" style="--p:0">${u.icon}</div>
+    <div><div class="name">${u.name}</div><div class="stats"></div></div>
+    <div class="cost">—</div>`;
+  unitsEl.appendChild(d);
+});
+const ringsSvg = document.getElementById('rings');
+UNITS.forEach((u, i) => {
+  const r = 47 - i * 5;
+  ringsSvg.innerHTML += `<circle class="track" cx="50" cy="50" r="${r}" stroke-width="2.6"/>
+    <circle class="arc" cx="50" cy="50" r="${r}" stroke-width="2.6" stroke="${u.color}"
+      stroke-dasharray="${2 * Math.PI * r}" stroke-dashoffset="${2 * Math.PI * r}" id="arc${i}"/>`;
+});
+unitsEl.addEventListener('pointerdown', e => {
+  const card = e.target.closest('.skill'); if (!card) return;
+  const i = +card.dataset.idx, u = UNITS[i];
+  if (!u.unlocked) return;
+  if (u.level >= u.cap) {
+    u.asc++; u.cap += 10; u.growth += 0.05;
+    toast('AWAKENING', `<b>${u.name}</b> erreicht Awakening-Stufe ${u.asc}. Macht ×2,6 · Limit Lv ${u.cap} · Upgrades künftig teurer (×${u.growth.toFixed(2)}).`);
+  } else if (S.score.gte(u.cost)) { S.score = S.score.sub(u.cost); u.level++; u.cost = u.cost.mul(u.growth); }
+});
+
+/* ═══════════ Rückkehr (= Prestige) ═══════════ */
+const reincBtn = document.getElementById('reincBtn');
+reincBtn.addEventListener('pointerdown', () => {
+  if (S.score.lt(1e6)) return;
+  S.reincClicks++;
+  if (S.reincClicks < 5) {
+    document.getElementById('reincNote').innerHTML = `Sicherheitsabfrage des Systems: <b style="color:var(--violet)">noch ${5 - S.reincClicks}× bestätigen.</b>`;
+    return;
+  }
+  const g = reincGain();
+  S.reincs++; S.pMult = g; S.pExp = 1 + S.reincs * 0.05; S.score = new Decimal(0); S.reincClicks = 0;
+  UNITS.forEach(u => { u.level = 1; u.progress = 0; u.asc = 0; u.cap = 20; u.growth = 1.18; u.cost = new Decimal(u.baseCost); });
+  // Gates resetten pro Rückkehr (inkl. ihrer Belohnungs-Multiplikatoren)
+  S.bossTier = 0; S.bossMax = 50; S.bossHp = 50; S.bossDead = false; S.globalMult = 1;
+  document.getElementById('gatePanel').classList.remove('cleared');
+  document.getElementById('bossName').textContent = BOSSES[0].n;
+  document.getElementById('bossClass').textContent = BOSSES[0].c;
+  document.getElementById('bossLog').innerHTML = 'Neuer Zyklus, neue Gates: Die Dungeons haben sich zurückgesetzt.';
+  document.getElementById('reincNote').textContent = 'Tag 0. Aber du weißt jetzt, wo alles ist.';
+  toast('EWIGE WIEDERKEHR', `Rückkehr Nr. <b>${S.reincs}</b> abgeschlossen. System-Bonus <b>×${fmt(g)}</b> · Exponent <b>^${S.pExp.toFixed(2)}</b>.`);
+});
+
+/* ═══════════ Gate/Boss ═══════════ */
+function hitBoss(dmg) {
+  if (S.bossDead) return;
+  S.bossHp -= dmg;
+  if (S.bossHp <= 0) {
+    S.bossTier++;
+    const rm = 3 * S.bossTier;
+    S.globalMult *= rm;
+    if (S.bossTier <= 3 && !UNITS[S.bossTier].unlocked) {
+      UNITS[S.bossTier].unlocked = true;
+      toast('SKILL ENTSIEGELT', `Neuer Skill verfügbar: <b>${UNITS[S.bossTier].name}</b>`);
+    }
+    toast('GATE GERÄUMT', `Belohnung: alle Mana-Gewinne <b>×${rm}</b>. Jäger-Rang steigt.`);
+    if (S.bossTier < BOSSES.length) {
+      S.bossMax = 50 * Math.pow(30, S.bossTier); S.bossHp = S.bossMax;
+      document.getElementById('bossName').textContent = BOSSES[S.bossTier].n;
+      document.getElementById('bossClass').textContent = BOSSES[S.bossTier].c;
+    } else {
+      S.bossDead = true;
+      document.getElementById('gatePanel').classList.add('cleared');
+      document.getElementById('bossName').textContent = '— Sektor gesichert —';
+      document.getElementById('bossLog').innerHTML = 'Alle Gates von Kapitel 1 geräumt. Das <b>Welten-Gate</b> wartet auf Synchronisation.';
+    }
+  }
+}
+
+/* ═══════════ Toasts ═══════════ */
+function toast(head, body) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<div class="thead">［ SYSTEM ］ ${head}</div>${body}`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 6100);
+}
+
+/* ═══════════ Loop + Render ═══════════ */
+const $ = id => document.getElementById(id);
+let last = performance.now();
+function tick() {
+  const now = performance.now();
+  const dt = Math.min((now - last) / 1000, 2); last = now;
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    u.progress += dt / lapTime(u);
+    const laps = Math.floor(u.progress);
+    if (laps > 0) {
+      u.progress -= laps;
+      S.score = S.score.add(gainPerLap().mul(laps));
+      hitBoss(laps * Math.min(product().toNumber(), 1e6) * 0.5 * (1 + i));
+    }
+  });
+  render();
+}
+function render() {
+  $('score').textContent = fmt(S.score) + ' ◆';
+  $('rate').textContent = `+${fmt(gainPerLap())} / Zirkelschluss`;
+  $('coreProduct').textContent = '×' + fmt(product());
+
+  let chain = '';
+  UNITS.forEach((u, i) => {
+    if (!u.unlocked) return;
+    chain += `${i > 0 ? '<span class="mult-x">×</span>' : ''}<span class="mult-chip" style="color:${u.color}">${fmt(unitMult(u))}</span>`;
+  });
+  chain += `<span class="mult-total rajdhani">= ×${fmt(product())}</span>`;
+  if (S.pMult.gt(1)) chain += `<span class="mult-x">· Bonus ×${fmt(S.pMult)} ^${S.pExp.toFixed(2)}</span>`;
+  $('topbar').innerHTML = chain;
+
+  UNITS.forEach((u, i) => {
+    const el = $('unit' + i);
+    el.classList.toggle('locked', !u.unlocked);
+    el.querySelector('.icon').style.setProperty('--p', u.progress.toFixed(3));
+    el.querySelector('.stats').innerHTML = u.unlocked
+      ? `Lv ${u.level}/${u.cap} · Macht <b>×${fmt(unitMult(u))}</b> · ${(1 / lapTime(u)).toFixed(2)} Z/s`
+      : `<i>Versiegelt — räume das ${i}. Gate</i>`;
+    const costEl = el.querySelector('.cost');
+    if (!u.unlocked) { costEl.textContent = '—'; el.classList.remove('ready'); el.classList.remove('dim'); }
+    else if (u.level >= u.cap) { costEl.textContent = 'Awakening bereit — Karte antippen'; el.classList.add('ready'); el.classList.remove('dim'); }
+    else { costEl.textContent = `Level up: ${fmt(u.cost)} ◆`; el.classList.remove('ready'); el.classList.toggle('dim', S.score.lt(u.cost)); }
+    const c = 2 * Math.PI * (47 - i * 5);
+    $('arc' + i).style.strokeDashoffset = u.unlocked ? c * (1 - u.progress) : c;
+  });
+
+  $('pmultNow').textContent = '×' + fmt(S.pMult);
+  $('pmultNext').textContent = '×' + fmt(reincGain());
+  $('pexpNow').textContent = '^' + S.pExp.toFixed(2);
+  $('reincCount').textContent = S.reincs;
+  $('rank').textContent = RANKS[Math.min(S.bossTier + S.reincs, RANKS.length - 1)];
+  $('title').textContent = TITLES[Math.min(S.reincs + (S.bossTier > 2 ? 1 : 0), TITLES.length - 1)];
+  reincBtn.classList.toggle('dim', S.score.lt(1e6));
+  reincBtn.textContent = S.reincClicks > 0 ? `［ Bestätigen … ${S.reincClicks}/5 ］` : '［ Protokoll ausführen ］';
+
+  if (!S.bossDead) {
+    $('bossHp').style.width = Math.max(0, S.bossHp / S.bossMax * 100) + '%';
+    $('bossHpNum').textContent = `${fmt(Math.max(0, S.bossHp))} / ${fmt(S.bossMax)} HP`;
+  } else { $('bossHp').style.width = '0%'; $('bossHpNum').textContent = '—'; }
+
+  const pct = Math.min(100, Math.max(0, S.score.max(1).log10().toNumber() / 12 * 100));
+  $('fzBar').style.width = pct + '%';
+  $('fzPct').textContent = pct.toFixed(2) + ' %';
+  if (!S.endShown && S.score.gte(1e12)) { S.endShown = true; $('endnote').classList.add('show'); }
+}
+last = performance.now();
+setInterval(tick, 100);
+</script>
+</body>
+</html>
